@@ -8,26 +8,16 @@ const Chatbot = () => {
     const [isFollowing, setIsFollowing] = useState(false);
     const [is_new, setIsNew] = useState(true)
     const [topic_id, setTopic_Id] = useState(null)
-    // const getChats = async () => {
-    //     const user_id = await localStorage.getItem('user_id');
-    //     const data = {
-    //     }
-    //     const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/chats`, data, {
-    //         headers: {
-    //             'Content-Type': 'application/json',
-    //         }
-    //     });
-    //     const chats = response.data.chats
-    //     const messageList = [];
-    //     chats.map((chat) => {
-    //         messageList.push({ type: "user", content: chat.query, time: 'Just now' })
-    //         messageList.push({ type: "AI", content: chat.response, time: 'Just now' })
-    //     })
-    //     setMessages(messageList);
-    // }
-    // useEffect(() => {
-    //     getChats()
-    // }, [])
+    const messagesEndRef = useRef(null);
+
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
     const handleSendMessage = async () => {
         if (inputText.trim()) {
             const copy_messages = messages
@@ -37,6 +27,7 @@ const Chatbot = () => {
         }
     };
     const getAnswer = async (copy_messages) => {
+        console.log(topic_id, "topic_id")
         const query = inputText;
         const user_id = await localStorage.getItem('user_id');
         const token = await localStorage.getItem('token');
@@ -50,6 +41,7 @@ const Chatbot = () => {
         });
         const data = await response.json();
         setTopic_Id(data.topic_id)
+        console.log(data.topic_id, "data.topic_id")
         setMessages([...copy_messages, { type: "AI", content: data.response, time: 'Just now' }]);
         setIsNew(false)
     }
@@ -87,6 +79,7 @@ const Chatbot = () => {
                         </div>
                     </div>
                 ))}
+                <div ref={messagesEndRef} />
             </div>
 
             {/* Input Bar (Fixed at Bottom) */}
