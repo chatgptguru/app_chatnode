@@ -5,7 +5,7 @@ import Data from '../data/Index';
 import Chatbot from '../chats/Chatbot';
 
 const Bot = () => {
-    const [currentPage, setCurrentPage] = useState('chats');
+    const [currentPage, setCurrentPage] = useState('Chats');
     return (
         <div className='flex flex-col items-center justify-center w-full p-4 bg-gray-50'>
             <div className='flex justify-between items-center bg-white border border-gray-200 rounded-full shadow-sm w-full max-w-[1200px] px-6 py-3'>

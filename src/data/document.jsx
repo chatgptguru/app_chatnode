@@ -16,23 +16,14 @@ const Document = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedDocument, setSelectedDocument] = useState(null);
     const [documentContent, setDocumentContent] = useState("");
+    const [selectedFileName, setSelectedFileName] = useState("");
 
     const handleFileChange = (event) => {
-        setFile(event.target.files[0]);
+        const selectedFile = event.target.files[0];
+        setFile(selectedFile);
+        setSelectedFileName(selectedFile ? selectedFile.name : "");
+        setMessage(""); // Clear any previous messages
     };
-
-    const getDocuments = async () => {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/documents`, {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        setDocuments(response.data.documents);
-    };
-
-    useEffect(() => {
-        getDocuments();
-    }, []);
 
     const handleUpload = async () => {
         if (!file) {
@@ -58,6 +49,8 @@ const Document = () => {
             const data = await response.json();
             if (response.ok) {
                 setMessage("PDF uploaded and processed successfully!");
+                setSelectedFileName(""); // Clear the selected file name
+                setFile(null); // Clear the selected file
                 getDocuments(); // Refresh the document list
             } else {
                 setMessage(data.error || "Failed to upload PDF.");
@@ -68,6 +61,19 @@ const Document = () => {
 
         setLoading(false);
     };
+
+    const getDocuments = async () => {
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/documents`, {
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        });
+        setDocuments(response.data.documents);
+    };
+
+    useEffect(() => {
+        getDocuments();
+    }, []);
 
     const handlePreview = async (document) => {
         setSelectedDocument(document);
@@ -92,7 +98,7 @@ const Document = () => {
         setSelectedDocument(null);
         setDocumentContent("");
     };
-
+    
     return (
         <div className="flex flex-col justify-center w-full gap-6 p-8 h-fit bg-gray-50">
             <div className="flex items-center justify-between">
@@ -111,6 +117,12 @@ const Document = () => {
             </div>
 
             <div className="min-h-[300px] border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center bg-white p-6">
+                {selectedFileName && (
+                    <div className="w-full p-3 mb-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-blue-800">Selected file: {selectedFileName}</p>
+                    </div>
+                )}
+                
                 {documents.map((document, index) => (
                     <div key={document.id} className="flex items-center justify-between p-3 mb-2 transition-shadow bg-white rounded-lg shadow-sm hover:shadow-md">
                         <div className="font-medium text-gray-700 truncate w-[500px]">
@@ -141,29 +153,32 @@ const Document = () => {
                     onChange={handleFileChange}
                     className="hidden"
                 />
-                <button
-                    className="px-6 py-3 text-lg font-semibold text-white transition duration-200 bg-blue-500 rounded-full hover:bg-blue-600 disabled:bg-gray-400"
-                    onClick={handleUpload}
-                    disabled={loading}
-                >
-                    {loading ? "Uploading..." : "Upload PDF"}
-                </button>
+                
+                {selectedFileName && (
+                    <button
+                        className="px-6 py-3 mt-4 text-lg font-semibold text-white transition duration-200 bg-blue-500 rounded-full hover:bg-blue-600 disabled:bg-gray-400"
+                        onClick={handleUpload}
+                        disabled={loading}
+                    >
+                        {loading ? "Uploading..." : "Upload PDF"}
+                    </button>
+                )}
+                
                 {message && <p className="mt-4 text-gray-700">{message}</p>}
             </div>
-            {/* Modal for Document Preview */}
             {isModalOpen && selectedDocument && (
                 <Modal
                     isOpen={isModalOpen}
                     onRequestClose={closeModal}
                     contentLabel="Document Preview"
-                    className="fixed inset-0 z-50 flex items-center justify-center" // Full-screen modal
-                    overlayClassName="fixed inset-0 bg-black bg-opacity-50" // Overlay with opacity
+                    className="fixed inset-0 z-50 flex items-center justify-center"
+                    overlayClassName="fixed inset-0 bg-black bg-opacity-50"
                 >
                     <div className="flex flex-col w-full h-full p-6 bg-white rounded-lg shadow-lg">
                         <h2 className="mb-4 text-2xl font-bold text-gray-800">Preview: {selectedDocument?.file_name}</h2>
                         <embed
                             src={`${import.meta.env.VITE_API_URL}/api/documents/${selectedDocument.id}/preview`}
-                            className="flex-1 w-full h-full" // Full width and height
+                            className="flex-1 w-full h-full"
                         />
                         <button
                             className="px-4 py-2 mt-4 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
