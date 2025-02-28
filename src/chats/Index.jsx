@@ -1,10 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import axios from 'axios';
-import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
 import Container from './Container';
-import Chatbot from './Chatbot';
-import History from './history';
+import History from './History';
 const Chats = () => {
     const navigate = useNavigate();
     return (
