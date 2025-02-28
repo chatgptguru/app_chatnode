@@ -8,27 +8,26 @@ const Chatbot = () => {
     const [isFollowing, setIsFollowing] = useState(false);
     const [is_new, setIsNew] = useState(true)
     const [topic_id, setTopic_Id] = useState(null)
-    const getChats = async () => {
-        const user_id = await localStorage.getItem('user_id');
-        const data = {
-        }
-        const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/chats`, data, {
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        });
-        const chats = response.data.chats
-        const messageList = [];
-        chats.map((chat) => {
-            messageList.push({ type: "user", content: chat.query, time: 'Just now' })
-            messageList.push({ type: "AI", content: chat.response, time: 'Just now' })
-            setMessages([...messages, ...messageList]);
-            console.log([...messages, messageList], "messages")
-        })
-    }
-    useEffect(() => {
-        getChats()
-    }, [])
+    // const getChats = async () => {
+    //     const user_id = await localStorage.getItem('user_id');
+    //     const data = {
+    //     }
+    //     const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/chats`, data, {
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //         }
+    //     });
+    //     const chats = response.data.chats
+    //     const messageList = [];
+    //     chats.map((chat) => {
+    //         messageList.push({ type: "user", content: chat.query, time: 'Just now' })
+    //         messageList.push({ type: "AI", content: chat.response, time: 'Just now' })
+    //     })
+    //     setMessages(messageList);
+    // }
+    // useEffect(() => {
+    //     getChats()
+    // }, [])
     const handleSendMessage = async () => {
         if (inputText.trim()) {
             const copy_messages = messages
@@ -39,13 +38,15 @@ const Chatbot = () => {
     };
     const getAnswer = async (copy_messages) => {
         const query = inputText;
-        const response = await fetch("http://127.0.0.1:5000/api/query", {
+        const user_id = await localStorage.getItem('user_id');
+        const token = await localStorage.getItem('token');
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/query`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json", // Specify JSON content type
-                Authorization: `Bearer YOUR_JWT_TOKEN`, // Replace with actual token
+                Authorization: `Bearer ${token}`, // Replace with actual token
             },
-            body: JSON.stringify({ query: query, is_new: is_new, topic_id: topic_id }), // Send the query as JSON
+            body: JSON.stringify({ query: query, is_new: is_new, topic_id: topic_id, user_id: user_id }), // Send the query as JSON
         });
         const data = await response.json();
         setTopic_Id(data.topic_id)

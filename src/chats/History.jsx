@@ -18,7 +18,7 @@ const History = () => {
         const data = {
             user_id
         }
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/topics`, data, {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/topics`, data, {
             headers: {
                 'Content-Type': 'application/json',
             }

@@ -19,7 +19,7 @@ const Container = () => {
         chats.map((chat) => {
             messageList.push({ type: "user", content: chat.query, time: 'Just now' })
             messageList.push({ type: "ai", content: chat.response, time: 'Just now' })
-            setMessages([...messages, ...messageList]);
+            setMessages(messageList);
         })
     }
     useEffect(() => {

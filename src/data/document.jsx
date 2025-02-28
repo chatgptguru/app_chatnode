@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { FaFile } from "react-icons/fa";
 import axios from "axios";
 import Modal from "react-modal"; // Import a modal library
+import { format, addMonths, subMonths } from 'date-fns';
 
 // Make sure to bind modal to your appElement (http://reactcommunity.org/react-modal/accessibility/)
 Modal.setAppElement('#root'); // Assuming your app is mounted on an element with id 'root'
@@ -17,6 +18,10 @@ const Document = () => {
     const [selectedDocument, setSelectedDocument] = useState(null);
     const [documentContent, setDocumentContent] = useState("");
     const [selectedFileName, setSelectedFileName] = useState("");
+    const [dateRange, setDateRange] = useState({
+        start: subMonths(new Date(), 1), // 1 month ago
+        end: new Date() // current date
+    });
 
     const handleFileChange = (event) => {
         const selectedFile = event.target.files[0];
@@ -33,7 +38,9 @@ const Document = () => {
 
         const formData = new FormData();
         formData.append("file", file);
-
+        const user_id = await localStorage.getItem('user_id');
+        const token = await localStorage.getItem('token');
+        formData.append("user_id", user_id);
         setLoading(true);
         setMessage("");
 
@@ -42,7 +49,7 @@ const Document = () => {
                 method: "POST",
                 body: formData,
                 headers: {
-                    Authorization: `Bearer YOUR_JWT_TOKEN`, // Replace with actual token
+                    Authorization: `Bearer ${token}`, // Replace with actual token
                 },
             });
 
@@ -63,9 +70,15 @@ const Document = () => {
     };
 
     const getDocuments = async () => {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/documents`, {
+        const user_id = await localStorage.getItem('user_id');
+        const token = await localStorage.getItem('token');
+        const data = {
+            user_id: user_id
+        }
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/documents`, data, {
             headers: {
                 'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
             }
         });
         setDocuments(response.data.documents);
@@ -98,7 +111,11 @@ const Document = () => {
         setSelectedDocument(null);
         setDocumentContent("");
     };
-    
+
+    const getDateRangeString = () => {
+        return `${format(dateRange.start, 'M/d/yy')} - ${format(dateRange.end, 'M/d/yy')}`;
+    };
+
     return (
         <div className="flex flex-col justify-center w-full gap-6 p-8 h-fit bg-gray-50">
             <div className="flex items-center justify-between">

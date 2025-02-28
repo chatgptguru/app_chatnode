@@ -55,6 +55,7 @@ const SignIn = () => {
                     toast.success(response.data.message)
                     await localStorage.setItem('token', response.data.token);
                     await localStorage.setItem('isSigned', true);
+                    await localStorage.setItem('user_id', response.data.user_id);
                     navigate('/dashboard');
                 } else {
                     toast.error(response.data.message)
