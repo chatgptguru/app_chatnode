@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { FiMessageSquare } from 'react-icons/fi';
-import Chats from '../chats';
+import Chats from '../chats/Index';
 import Data from '../data/Index';
 import Chatbot from '../chats/Chatbot';
 

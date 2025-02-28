@@ -8,7 +8,6 @@ import { LuSettings } from "react-icons/lu";
 import { FaRegUserCircle } from "react-icons/fa";
 import { FaAngleDown } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
-import Chats from './chats';
 import Bot from './bot/Index';
 
 const Dashboard = () => {
