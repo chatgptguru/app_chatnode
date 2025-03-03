@@ -21,16 +21,33 @@ const Chatbot = () => {
 
         // Listen for responses
         socket.on('response', (data) => {
-            messages_ref.current = [...messages_ref.current, { type: "AI", content: data.response, time: 'Just now' }]
-            setMessages(messages_ref.current);
+            setMessages(prevMessages => [...prevMessages, { type: "AI", content: data.response, time: 'Just now' }]);
             setIsLoading(false);
+            setIsNew(false);
+            if (data.topic_id) {
+                setTopic_Id(data.topic_id);
+            }
         });
 
         // Listen for errors
         socket.on('error', (error) => {
             console.error('Error:', error);
+            setIsLoading(false);
+            setMessages(prevMessages => [...prevMessages, { 
+                type: "AI", 
+                content: "An error occurred while getting the response.",
+                time: 'Just now',
+                isError: true 
+            }]);
         });
-    }, [])
+
+        // Cleanup function to remove listeners when component unmounts
+        return () => {
+            socket.off('response');
+            socket.off('error');
+        };
+    }, []);
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
@@ -41,9 +58,7 @@ const Chatbot = () => {
 
     const handleSendMessage = async () => {
         if (inputText.trim()) {
-            const copy_messages = messages
-            setMessages([...copy_messages, { type: "user", content: inputText, time: 'Just now' }]);
-            messages_ref.current = [...copy_messages, { type: "user", content: inputText, time: 'Just now' }]
+            setMessages(prevMessages => [...prevMessages, { type: "user", content: inputText, time: 'Just now' }]);
             getAnswer()
             setInputText('');
         }

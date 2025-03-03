@@ -70,7 +70,7 @@ const History = () => {
             </div>
 
             {/* History List */}
-            <div className='p-4 space-y-3'>
+            <div className='p-4 space-y-3 overflow-y-auto h-[500px]'>
                 {filteredHistories.map((history) => (
                     <div key={history.id} className='p-3 transition-colors rounded-lg hover:bg-gray-50 cursor-pointer' onClick={() => {
                         dispatch(setTopicId(history.id))
