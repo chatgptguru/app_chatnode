@@ -6,6 +6,7 @@ import { io } from 'socket.io-client';
 const socket = io(`${import.meta.env.VITE_API_URL}`);
 const Chatbot = () => {
     const [messages, setMessages] = useState([]);
+    const messages_ref = useRef([])
     const [inputText, setInputText] = useState('');
     const [isFollowing, setIsFollowing] = useState(false);
     const [is_new, setIsNew] = useState(true);
@@ -17,10 +18,11 @@ const Chatbot = () => {
         socket.on('connect', () => {
             console.log('Connected to server');
         });
-        
+
         // Listen for responses
         socket.on('response', (data) => {
-            setMessages([...messages, { type: "AI", content: data.response, time: 'Just now' }]);
+            messages_ref.current = [...messages_ref.current, { type: "AI", content: data.response, time: 'Just now' }]
+            setMessages(messages_ref.current);
             setIsLoading(false);
         });
 
@@ -41,11 +43,12 @@ const Chatbot = () => {
         if (inputText.trim()) {
             const copy_messages = messages
             setMessages([...copy_messages, { type: "user", content: inputText, time: 'Just now' }]);
-            getAnswer([...copy_messages, { type: "user", content: inputText, time: 'Just now' }])
+            messages_ref.current = [...copy_messages, { type: "user", content: inputText, time: 'Just now' }]
+            getAnswer()
             setInputText('');
         }
     };
-    const getAnswer = async (copy_messages) => {
+    const getAnswer = async () => {
         console.log(topic_id, "topic_id")
         const query = inputText;
         const user_id = await localStorage.getItem('user_id');
