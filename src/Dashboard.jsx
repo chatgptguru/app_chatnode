@@ -9,6 +9,7 @@ import { FaRegUserCircle } from "react-icons/fa";
 import { FaAngleDown } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import Bot from './bot/Index';
+import Team from './team/Index';
 
 const Dashboard = () => {
     const navigate = useNavigate();
@@ -60,16 +61,18 @@ const Dashboard = () => {
                             <FaAngleDown />
                         </div>
                         {isShowUserDrowDown && <div className='absolute right-0 w-[250px] flex flex-col gap-1 px-5 py-1 text-black bg-white rounded-lg shadow-lg top-10'>
-                            <div className='px-2 font-bold text-[16px] text-gray-400'>Accounts</div>
-                            <div className='px-2 font-bold text-[16px] text-gray-700 hover:bg-gray-300 py-2 rounded-2xl'>Settings</div>
+                            <div className='px-2 cursor-pointer font-bold text-[16px] text-gray-400'>Accounts</div>
+                            <div className='px-2 cursor-pointer font-bold text-[16px] text-gray-700 hover:bg-gray-300 py-2 rounded-2xl'>Settings</div>
                             <div className='w-full h-[1px] bg-gray-500'></div>
-                            <div className='px-2 font-bold text-[16px] text-gray-400'>Team/Default Team</div>
-                            <div className='px-2 font-bold text-[16px] text-gray-700 hover:bg-gray-300 py-2 rounded-2xl'>Subscription</div>
-                            <div className='px-2 font-bold text-[16px] text-gray-700 hover:bg-gray-300 py-2 rounded-2xl'>Settings</div>
-                            <div className='px-2 font-bold text-[16px] text-gray-700 hover:bg-gray-300 py-2 rounded-2xl'>Members</div>
-                            <div className='px-2 font-bold text-[16px] text-gray-700 hover:bg-gray-300 py-2 rounded-2xl'>API Access</div>
+                            <div className='px-2 cursor-pointer font-bold text-[16px] text-gray-400'>Team/Default Team</div>
+                            <div className='px-2 cursor-pointer font-bold text-[16px] text-gray-700 hover:bg-gray-300 py-2 rounded-2xl' onClick={() => {
+                                navigate('/subscription-plans')
+                            }}>Subscription</div>
+                            <div className='px-2 cursor-pointer font-bold text-[16px] text-gray-700 hover:bg-gray-300 py-2 rounded-2xl'>Settings</div>
+                            <div className='px-2 cursor-pointer font-bold text-[16px] text-gray-700 hover:bg-gray-300 py-2 rounded-2xl'>Members</div>
+                            <div className='px-2 cursor-pointer font-bold text-[16px] text-gray-700 hover:bg-gray-300 py-2 rounded-2xl'>API Access</div>
                             <div className='w-full h-[1px] bg-gray-500'></div>
-                            <div className='px-2 py-2 rounded-lg cursor-pointer hover:bg-gray-500' onClick={signOut}>
+                            <div className='px-2 cursor-pointer py-2 rounded-lg cursor-pointer hover:bg-gray-500' onClick={signOut}>
                                 Sign Out
                             </div>
                         </div>}
@@ -77,6 +80,7 @@ const Dashboard = () => {
                 </div>
             </div>
             <Bot/>
+            {/* <Team /> */}
         </div>
     );
 };

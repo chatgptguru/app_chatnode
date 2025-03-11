@@ -6,9 +6,6 @@ const Layout = () => {
     React.useEffect(() => {
         if (!localStorage.getItem("isSigned"))
             navigate('/signin')
-        else{
-            navigate('/dashboard')
-        }
     }, [navigate]);
     return (
         <Outlet />

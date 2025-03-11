@@ -22,6 +22,7 @@ const Document = () => {
         start: subMonths(new Date(), 1), // 1 month ago
         end: new Date() // current date
     });
+    const [currentPlan, setCurrentPlan] = useState(null);
 
     const handleFileChange = (event) => {
         const selectedFile = event.target.files[0];
@@ -30,9 +31,39 @@ const Document = () => {
         setMessage(""); // Clear any previous messages
     };
 
+    useEffect(() => {
+        getCurrentPlan();
+        getDocuments();
+    }, []);
+
+    const getCurrentPlan = async () => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/subscriptions/${localStorage.getItem('user_id')}`)
+            setCurrentPlan(response.data)
+        } catch (error) {
+            console.error('Error fetching plan:', error);
+            setMessage('Failed to fetch subscription plan');
+        }
+    }
+
     const handleUpload = async () => {
         if (!file) {
             setMessage("Please select a PDF file.");
+            return;
+        }
+
+        // Check document limits based on plan
+        if (!currentPlan) {
+            setMessage("Unable to verify your subscription plan. Please try again.");
+            return;
+        }
+
+        if (documents.length >= currentPlan.document_limit) {
+            const planName = currentPlan.name === "Free" ? "Professional" : "Enterprise";
+            setMessage(
+                `You have reached your ${currentPlan.name} plan's document limit (${currentPlan.document_limit}). ` +
+                `Please upgrade to ${planName} plan to upload more documents.`
+            );
             return;
         }
 
@@ -84,10 +115,6 @@ const Document = () => {
         setDocuments(response.data.documents);
     };
 
-    useEffect(() => {
-        getDocuments();
-    }, []);
-
     const handlePreview = async (document) => {
         setSelectedDocument(document);
         setIsModalOpen(true);
@@ -134,12 +161,20 @@ const Document = () => {
             </div>
 
             <div className="min-h-[300px] border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center bg-white p-6">
+                {currentPlan && (
+                    <div className="w-full p-3 mb-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-blue-800">
+                            Document Usage: {documents.length} / {currentPlan.document_limit}
+                        </p>
+                    </div>
+                )}
+
                 {selectedFileName && (
                     <div className="w-full p-3 mb-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <p className="text-blue-800">Selected file: {selectedFileName}</p>
                     </div>
                 )}
-                
+
                 {documents.map((document, index) => (
                     <div key={document.id} className="flex items-center justify-between p-3 mb-2 transition-shadow bg-white rounded-lg shadow-sm hover:shadow-md">
                         <div className="font-medium text-gray-700 truncate w-[500px]">
@@ -170,7 +205,7 @@ const Document = () => {
                     onChange={handleFileChange}
                     className="hidden"
                 />
-                
+
                 {selectedFileName && (
                     <button
                         className="px-6 py-3 mt-4 text-lg font-semibold text-white transition duration-200 bg-blue-500 rounded-full hover:bg-blue-600 disabled:bg-gray-400"
@@ -180,7 +215,7 @@ const Document = () => {
                         {loading ? "Uploading..." : "Upload PDF"}
                     </button>
                 )}
-                
+
                 {message && <p className="mt-4 text-gray-700">{message}</p>}
             </div>
             {isModalOpen && selectedDocument && (

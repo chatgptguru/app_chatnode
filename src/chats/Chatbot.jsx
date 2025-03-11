@@ -2,8 +2,10 @@ import axios from 'axios';
 import React, { useState, useRef, useEffect } from 'react';
 import { IoRefreshSharp, IoCopyOutline, IoCheckmark, IoPaperPlaneOutline } from 'react-icons/io5';
 import { io } from 'socket.io-client';
+import { toast } from 'react-toastify';
 
 const socket = io(`${import.meta.env.VITE_API_URL}`);
+
 const Chatbot = () => {
     const [messages, setMessages] = useState([]);
     const messages_ref = useRef([])
@@ -13,7 +15,22 @@ const Chatbot = () => {
     const [topic_id, setTopic_Id] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
+    const [currentPlan, setCurrentPlan] = useState('Free');
+    const [messageLimit, setMessageLimit] = useState(10);
+
+    const getCurrentPlan = async () => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/subscriptions/${localStorage.getItem('user_id')}`)
+            // setCurrentPlan(response.data.name);
+            // setMessageLimit(response.data.message_limit);
+        } catch (error) {
+            console.error('Error fetching plan:', error);
+            toast.error('Failed to fetch subscription plan');
+        }
+    }
+
     useEffect(() => {
+        getCurrentPlan();
         // Listen for connection
         socket.on('connect', () => {
             console.log('Connected to server');
@@ -33,11 +50,11 @@ const Chatbot = () => {
         socket.on('error', (error) => {
             console.error('Error:', error);
             setIsLoading(false);
-            setMessages(prevMessages => [...prevMessages, { 
-                type: "AI", 
+            setMessages(prevMessages => [...prevMessages, {
+                type: "AI",
                 content: "An error occurred while getting the response.",
                 time: 'Just now',
-                isError: true 
+                isError: true
             }]);
         });
 
@@ -58,8 +75,13 @@ const Chatbot = () => {
 
     const handleSendMessage = async () => {
         if (inputText.trim()) {
+            if (messages.length >= messageLimit) {
+                toast.error(`You have reached the message limit (${messageLimit}) for the Free plan. Please upgrade to continue chatting.`);
+                return;
+            }
+            
             setMessages(prevMessages => [...prevMessages, { type: "user", content: inputText, time: 'Just now' }]);
-            getAnswer()
+            getAnswer();
             setInputText('');
         }
     };
@@ -70,72 +92,6 @@ const Chatbot = () => {
         const token = await localStorage.getItem('token');
         setIsLoading(true);
         socket.emit('query', { query, is_new, topic_id, user_id });
-
-        // const maxRetries = 3;
-        // let retryCount = 0;
-        // let lastError = null;
-
-        // while (retryCount < maxRetries) {
-        //     try {
-        //         const { data } = await axios({
-        //             method: 'post',
-        //             url: `${import.meta.env.VITE_API_URL}/api/query`,
-        //             data: { query, is_new, topic_id, user_id },
-        //             headers: {
-        //                 Authorization: `Bearer ${token}`,
-        //             },
-        //             timeout: 300000, // 5 minutes timeout
-        //         });
-
-        //         setTopic_Id(data.topic_id);
-        //         console.log(data.topic_id, "data.topic_id");
-        //         setMessages([...copy_messages, { type: "AI", content: data.response, time: 'Just now' }]);
-        //         setIsNew(false);
-        //         return; // Success, exit the function
-
-        //     } catch (error) {
-        //         console.error(`Attempt ${retryCount + 1} failed:`, error);
-        //         lastError = error;
-
-        //         // Only retry on timeout or 504 errors
-        //         if (error.code !== 'ECONNABORTED' && error.response?.status !== 504) {
-        //             break; // Don't retry on other errors
-        //         }
-
-        //         retryCount++;
-        //         if (retryCount < maxRetries) {
-        //             const delayMs = Math.min(1000 * Math.pow(2, retryCount), 10000); // Exponential backoff with max 10s delay
-        //             setMessages([...copy_messages, {
-        //                 type: "AI",
-        //                 content: `Request timed out. Retrying in ${delayMs / 1000} seconds... (Attempt ${retryCount + 1}/${maxRetries})`,
-        //                 time: 'Just now',
-        //                 isError: true
-        //             }]);
-        //             await new Promise(resolve => setTimeout(resolve, delayMs));
-        //         }
-        //     }
-        // }
-
-        // // If we get here, all retries failed
-        // let errorMessage = 'An error occurred while getting the response.';
-
-        // if (lastError) {
-        //     if (lastError.code === 'ECONNABORTED' || lastError.response?.status === 504) {
-        //         errorMessage = `The request timed out after ${maxRetries} attempts. The server might be overloaded. Please try again later.`;
-        //     } else if (lastError.response?.status === 401) {
-        //         errorMessage = 'Authentication failed. Please log in again.';
-        //     } else if (lastError.response?.status === 403) {
-        //         errorMessage = 'You do not have permission to perform this action.';
-        //     }
-        // }
-
-        // setMessages([...copy_messages, {
-        //     type: "AI",
-        //     content: errorMessage,
-        //     time: 'Just now',
-        //     isError: true
-        // }]);
-        // setIsLoading(false);
     }
     return (
         <div className='w-[600px] mx-auto bg-gray-50 rounded-lg shadow-lg h-[700px] flex flex-col'>
@@ -147,12 +103,19 @@ const Chatbot = () => {
                         <div className='w-2 h-2 bg-blue-500 rounded-full'></div>
                         <div className='text-sm text-blue-500'>Online</div>
                     </div>
-                    <button className='p-2 rounded-full hover:bg-gray-100' onClick={() => {
-                        setIsNew(true)
-                        setMessages([])
-                    }}>
-                        <IoRefreshSharp className='text-gray-600' />
-                    </button>
+                    <div className='flex items-center gap-4'>
+                        {currentPlan === 'Free' && messageLimit && (
+                            <div className='text-sm text-gray-600'>
+                                Messages: {messages.length}/{messageLimit}
+                            </div>
+                        )}
+                        <button className='p-2 rounded-full hover:bg-gray-100' onClick={() => {
+                            setIsNew(true)
+                            setMessages([])
+                        }}>
+                            <IoRefreshSharp className='text-gray-600' />
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -180,6 +143,19 @@ const Chatbot = () => {
                                 <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
                                 <div className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '600ms' }}></div>
                             </div>
+                        </div>
+                    </div>
+                )}
+                {currentPlan === 'Free' && messages.length >= messageLimit && (
+                    <div className="flex justify-center">
+                        <div className="bg-blue-50 p-4 rounded-lg text-center">
+                            <p className="text-blue-800 mb-2">You've reached the {messageLimit} message limit on the free plan</p>
+                            <a 
+                                href="/subscription" 
+                                className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                            >
+                                Upgrade Now
+                            </a>
                         </div>
                     </div>
                 )}
