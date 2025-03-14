@@ -16,13 +16,15 @@ const Chatbot = () => {
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef(null);
     const [currentPlan, setCurrentPlan] = useState('Free');
-    const [messageLimit, setMessageLimit] = useState(10);
+    const [messageLimit, setMessageLimit] = useState(0);
 
     const getCurrentPlan = async () => {
         try {
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/subscriptions/${localStorage.getItem('user_id')}`)
-            // setCurrentPlan(response.data.name);
-            // setMessageLimit(response.data.message_limit);
+            console.log(response.data, "response")
+            setCurrentPlan(response.data.name);
+            setMessageLimit(response.data.message_limit);
+            console.log(response.data.message_limit, "message_limit")
         } catch (error) {
             console.error('Error fetching plan:', error);
             toast.error('Failed to fetch subscription plan');
@@ -71,15 +73,16 @@ const Chatbot = () => {
 
     useEffect(() => {
         scrollToBottom();
+        getCurrentPlan()
     }, [messages]);
 
     const handleSendMessage = async () => {
         if (inputText.trim()) {
-            if (messages.length >= messageLimit) {
+            if ((messages.length / 2) >= messageLimit) {
                 toast.error(`You have reached the message limit (${messageLimit}) for the Free plan. Please upgrade to continue chatting.`);
                 return;
             }
-            
+
             setMessages(prevMessages => [...prevMessages, { type: "user", content: inputText, time: 'Just now' }]);
             getAnswer();
             setInputText('');
@@ -104,9 +107,9 @@ const Chatbot = () => {
                         <div className='text-sm text-blue-500'>Online</div>
                     </div>
                     <div className='flex items-center gap-4'>
-                        {currentPlan === 'Free' && messageLimit && (
+                        {messageLimit && (
                             <div className='text-sm text-gray-600'>
-                                Messages: {messages.length}/{messageLimit}
+                                Messages: {messages.length / 2}/{messageLimit}
                             </div>
                         )}
                         <button className='p-2 rounded-full hover:bg-gray-100' onClick={() => {
@@ -150,8 +153,8 @@ const Chatbot = () => {
                     <div className="flex justify-center">
                         <div className="bg-blue-50 p-4 rounded-lg text-center">
                             <p className="text-blue-800 mb-2">You've reached the {messageLimit} message limit on the free plan</p>
-                            <a 
-                                href="/subscription" 
+                            <a
+                                href="/subscription"
                                 className="inline-block px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
                             >
                                 Upgrade Now

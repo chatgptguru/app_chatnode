@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import SignIn from './auth/SingIn';
 import Dashboard from './Dashboard';
 import NotFound from './Notfound';
@@ -21,23 +21,33 @@ import ChatLogs from './admin/ChatLogs';
 import Settings from './admin/Settings';
 import HelpSupport from './admin/HelpSupport';
 import SubscriptionPlans from './components/SubscriptionPlans';
+import AdminLogin from './admin/AdminLogin';
+import ProtectedRoute from './admin/ProtectedRoute';
 
 function App() {
   return (
     <Provider store={store}>
       <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
         <AuthProvider>
-          <Router>
+          <BrowserRouter>
             <ToastContainer />
             <Routes>
               <Route path="/signup" element={<SignUp />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/subscription-plans" element={<SubscriptionPlans />} />
               <Route path="/" element={<Layout />} >
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/" element={<Dashboard />} />
                 <Route path="*" element={<NotFound />} />
               </Route>
-              <Route path="/admin" element={<AdminLayout />}>
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route
+                path="/admin/*"
+                element={
+                  <ProtectedRoute>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }
+              >
                 <Route index element={<AdminDashboard />} />
                 <Route path="users" element={<UsersManagement />} />
                 <Route path="models" element={<ModelsManagement />} />
@@ -48,7 +58,7 @@ function App() {
                 <Route path="help" element={<HelpSupport />} />
               </Route>
             </Routes>
-          </Router >
+          </BrowserRouter >
         </AuthProvider>
       </GoogleOAuthProvider >
     </Provider >

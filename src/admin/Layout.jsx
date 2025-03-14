@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     FiUsers, FiBox, FiDollarSign, FiHome, FiMenu, FiX,
     FiSettings, FiActivity, FiMessageSquare, FiHelpCircle,
@@ -8,6 +8,7 @@ import {
 import { FaUserCircle } from 'react-icons/fa';
 
 const Layout = () => {
+    const navigate = useNavigate();
     const [isSidebarOpen, setSidebarOpen] = useState(true);
     const [isProfileDropdownOpen, setProfileDropdownOpen] = useState(false);
     const [isNotificationDropdownOpen, setNotificationDropdownOpen] = useState(false);
@@ -19,8 +20,7 @@ const Layout = () => {
         { path: '/admin/models', icon: <FiBox />, label: 'Models Management' },
         { path: '/admin/subscriptions', icon: <FiDollarSign />, label: 'Subscriptions' },
         { path: '/admin/chats', icon: <FiMessageSquare />, label: 'Chat Logs' },
-        { path: '/admin/settings', icon: <FiSettings />, label: 'Settings' },
-        { path: '/admin/help', icon: <FiHelpCircle />, label: 'Help & Support' },
+        // { path: '/admin/help', icon: <FiHelpCircle />, label: 'Help & Support' },
     ];
 
     const notifications = [
@@ -63,20 +63,10 @@ const Layout = () => {
             <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Top Navigation Bar */}
                 <header className="bg-white shadow-sm">
-                    <div className="flex items-center justify-between px-6 py-4">
-                        <div className="flex items-center flex-1">
-                            <div className="relative w-64">
-                                <input
-                                    type="text"
-                                    placeholder="Search..."
-                                    className="w-full pl-10 pr-4 py-2 rounded-lg border focus:outline-none focus:border-blue-500"
-                                />
-                                <FiSearch className="absolute left-3 top-3 text-gray-400" />
-                            </div>
-                        </div>
+                    <div className="flex items-center justify-end px-6 py-4">
 
                         <div className="flex items-center space-x-4">
-                            {/* Notifications */}
+                            {/* Notifications
                             <div className="relative">
                                 <button
                                     onClick={() => setNotificationDropdownOpen(!isNotificationDropdownOpen)}
@@ -97,7 +87,7 @@ const Layout = () => {
                                         ))}
                                     </div>
                                 )}
-                            </div>
+                            </div> */}
 
                             {/* Profile Dropdown */}
                             <div className="relative">
@@ -115,14 +105,11 @@ const Layout = () => {
 
                                 {isProfileDropdownOpen && (
                                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
-                                        <Link to="/admin/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            Profile Settings
-                                        </Link>
-                                        <Link to="/admin/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                            Account Settings
-                                        </Link>
                                         <div className="border-t my-1"></div>
-                                        <button className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">
+                                        <button className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100" onClick={() => {
+                                            localStorage.removeItem('adminAuthenticated');
+                                            navigate('/admin/login');
+                                        }}>
                                             Sign Out
                                         </button>
                                     </div>

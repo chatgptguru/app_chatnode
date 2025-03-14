@@ -10,9 +10,13 @@ import { FaAngleDown } from "react-icons/fa";
 import { useNavigate } from 'react-router-dom';
 import Bot from './bot/Index';
 import Team from './team/Index';
+import { useDispatch, useSelector } from 'react-redux';
+import { setIsSideBarOpen, setIsTeamBarOpen, setIsBotBarOpen } from './store/reducers/layoutReducer';
 
 const Dashboard = () => {
     const navigate = useNavigate();
+    const isTeamBarOpen = useSelector((state) => state.layout.isTeamBarOpen);
+    const dispatch = useDispatch();
     const signOut = async () => {
         await localStorage.removeItem('token');
         await localStorage.removeItem('isSigned');
@@ -40,10 +44,10 @@ const Dashboard = () => {
                     {isShowTeamDrowDown && <div className='absolute w-[200px] flex flex-col gap-2 px-5 py-1 text-black bg-white rounded-lg shadow-lg top-10'>
                         <div className='px-2 font-bold text-[18px] text-gray-400'>Teams</div>
                         <div className='flex flex-col items-start gap-2'>
-                            <div className='flex items-center justify-start w-full px-1 py-2 cursor-pointer rounded-xl hover:bg-gray-300'>
+                            <div onClick={() => dispatch(setIsTeamBarOpen(true))} className='flex items-center justify-start w-full px-1 py-2 cursor-pointer rounded-xl hover:bg-gray-300'>
                                 <div>Team 1</div><LuSettings />
                             </div>
-                            <div className='flex items-center justify-start w-full px-1 py-2 cursor-pointer rounded-xl hover:bg-gray-300'>
+                            <div onClick={() => dispatch(setIsTeamBarOpen(true))} className='flex items-center justify-start w-full px-1 py-2 cursor-pointer rounded-xl hover:bg-gray-300'>
                                 <div>Team 2</div><LuSettings />
                             </div>
                         </div>
@@ -52,7 +56,10 @@ const Dashboard = () => {
                         </div>
                     </div>}
                 </div>
-                <div>
+                <div className='flex items-center gap-2'>
+                    <div className='flex items-center gap-2 bg-blue-300 rounded-3xl px-2 py-1 font-bold cursor-pointer shadow-lg' onClick={() => dispatch(setIsTeamBarOpen(false))}>
+                        Chatbots
+                    </div>
                     <div className='relative'>
                         <div className='flex items-center px-2 py-1 cursor-pointer rounded-3xl hover:bg-gray-400' onClick={() => {
                             setIsShowUserDrowDown(true)
@@ -79,8 +86,7 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
-            <Bot/>
-            {/* <Team /> */}
+            {isTeamBarOpen ? <Team /> : <Bot />}
         </div>
     );
 };

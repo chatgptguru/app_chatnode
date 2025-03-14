@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { 
-    FiUsers, FiMessageSquare, FiDollarSign, 
-    FiTrendingUp, FiClock, FiActivity 
+import {
+    FiUsers, FiMessageSquare, FiDollarSign,
+    FiTrendingUp, FiClock, FiActivity
 } from 'react-icons/fi';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -39,7 +39,7 @@ const Dashboard = () => {
             });
 
             const { stats, userGrowth, subscriptionDistribution, activities } = response.data;
-            
+
             setStats(stats);
             setLineChartData(userGrowth);
             setPieChartData(subscriptionDistribution);
@@ -65,7 +65,7 @@ const Dashboard = () => {
             <div className="flex justify-between items-center">
                 <h2 className="text-2xl font-bold">Dashboard Overview</h2>
                 <div className="flex space-x-2">
-                    <select 
+                    <select
                         className="border rounded-lg px-3 py-2"
                         value={timeRange}
                         onChange={(e) => setTimeRange(e.target.value)}
@@ -76,7 +76,7 @@ const Dashboard = () => {
                     </select>
                 </div>
             </div>
-            
+
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {stats.map((stat, index) => (
@@ -87,9 +87,8 @@ const Dashboard = () => {
                                 {stat.icon === 'messages' && <FiMessageSquare />}
                                 {stat.icon === 'revenue' && <FiDollarSign />}
                             </div>
-                            <span className={`text-sm font-semibold ${
-                                stat.changeType === 'positive' ? 'text-green-500' : 'text-red-500'
-                            }`}>
+                            <span className={`text-sm font-semibold ${stat.changeType === 'positive' ? 'text-green-500' : 'text-red-500'
+                                }`}>
                                 {stat.change}
                             </span>
                         </div>
@@ -103,7 +102,29 @@ const Dashboard = () => {
 
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* User Growth Chart */}
+                {/* Recent Activity */}
+                <div className="bg-white rounded-lg shadow">
+                    <div className="p-6">
+                        <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
+                        <div className="space-y-4">
+                            {recentActivities.map((activity) => (
+                                <div key={activity.id} className="flex items-center justify-between border-b pb-4">
+                                    <div className="flex items-center space-x-3">
+                                        <div className="p-2 bg-gray-100 rounded-full">
+                                            <FiClock className="text-gray-600" />
+                                        </div>
+                                        <div>
+                                            <p className="font-medium">{activity.user}</p>
+                                            <p className="text-sm text-gray-500">{activity.action}</p>
+                                        </div>
+                                    </div>
+                                    <span className="text-sm text-gray-500">{activity.time}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                {/* User Growth Chart
                 <div className="bg-white rounded-lg shadow p-6">
                     <h3 className="text-lg font-semibold mb-4">User Growth</h3>
                     <div className="h-80">
@@ -117,7 +138,7 @@ const Dashboard = () => {
                             </LineChart>
                         </ResponsiveContainer>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Subscription Distribution */}
                 <div className="bg-white rounded-lg shadow p-6">
@@ -143,28 +164,7 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Recent Activity */}
-            <div className="bg-white rounded-lg shadow">
-                <div className="p-6">
-                    <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-                    <div className="space-y-4">
-                        {recentActivities.map((activity) => (
-                            <div key={activity.id} className="flex items-center justify-between border-b pb-4">
-                                <div className="flex items-center space-x-3">
-                                    <div className="p-2 bg-gray-100 rounded-full">
-                                        <FiClock className="text-gray-600" />
-                                    </div>
-                                    <div>
-                                        <p className="font-medium">{activity.user}</p>
-                                        <p className="text-sm text-gray-500">{activity.action}</p>
-                                    </div>
-                                </div>
-                                <span className="text-sm text-gray-500">{activity.time}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
+
         </div>
     );
 };
