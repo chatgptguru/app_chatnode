@@ -1,16 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  FiSearch, 
-  FiEye 
+import {
+  FiSearch,
+  FiEye,
+  FiTrash2
 } from 'react-icons/fi';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import Modal from 'react-modal';
 
 const ChatLogs = () => {
   const [chatLogs, setChatLogs] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredLogs, setFilteredLogs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedLog, setSelectedLog] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const fetchChatLogs = async () => {
     try {
@@ -56,6 +62,53 @@ const ChatLogs = () => {
     }
   };
 
+  const deleteChatLog = async (logId) => {
+    try {
+      const token = await localStorage.getItem('token');
+      await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/chat-logs/${logId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      toast.success('Chat log deleted successfully');
+      fetchChatLogs(); // Refresh the list
+    } catch (error) {
+      console.error('Error deleting chat log:', error);
+      toast.error('Failed to delete chat log');
+    }
+  };
+
+  const clearAllLogs = async () => {
+    if (window.confirm('Are you sure you want to delete all chat logs? This action cannot be undone.')) {
+      try {
+        const token = await localStorage.getItem('token');
+        await axios.delete(`${import.meta.env.VITE_API_URL}/api/admin/chat-logs`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          }
+        });
+        toast.success('All chat logs cleared successfully');
+        fetchChatLogs(); // Refresh the list
+      } catch (error) {
+        console.error('Error clearing chat logs:', error);
+        toast.error('Failed to clear chat logs');
+      }
+    }
+  };
+
+  const openModal = (log) => {
+    console.log(log);
+    setModalContent(log);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setModalContent(null);
+  };
+
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-gray-900">Chat Logs</h1>
@@ -74,6 +127,14 @@ const ChatLogs = () => {
       </div>
 
       <div className="bg-white shadow overflow-hidden sm:rounded-lg">
+        <div className="flex justify-end p-4">
+          <button
+            onClick={clearAllLogs}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            Clear All Logs
+          </button>
+        </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -142,9 +203,20 @@ const ChatLogs = () => {
                       {log.messageCount}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <button className="text-blue-600 hover:text-blue-900">
-                        <FiEye className="h-5 w-5" />
-                      </button>
+                      <div className="flex space-x-2">
+                        <button
+                          className="text-blue-600 hover:text-blue-900"
+                          onClick={() => openModal(log)}
+                        >
+                          <FiEye className="h-5 w-5" />
+                        </button>
+                        <button
+                          className="text-red-600 hover:text-red-900"
+                          onClick={() => deleteChatLog(log.id)}
+                        >
+                          <FiTrash2 className="h-5 w-5" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -153,6 +225,68 @@ const ChatLogs = () => {
           </table>
         </div>
       </div>
+
+      <Modal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        ariaHideApp={false}
+        style={{
+          overlay: {
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          },
+          content: {
+            top: '50%',
+            left: '50%',
+            right: 'auto',
+            bottom: 'auto',
+            transform: 'translate(-50%, -50%)',
+            width: '650px',
+            padding: '20px',
+            borderRadius: '10px',
+            boxShadow: '0 8px 30px rgba(0, 0, 0, 0.3)',
+            border: 'none',
+          }
+        }}
+      >
+        <h2 className="text-xl font-bold text-center mb-4">Chat Log Details</h2>
+        {modalContent && (
+          <div className="space-y-2">
+            <p><strong>Timestamp:</strong> {modalContent.timestamp}</p>
+            <p><strong>User:</strong> {modalContent.user}</p>
+            <p><strong>Model:</strong> {modalContent.model}</p>
+            <p><strong>Status:</strong> {modalContent.status}</p>
+            <div>
+              <p><strong>Query:</strong></p>
+              <div className="max-h-[200px] overflow-y-auto">
+                <p className={`${isExpanded ? '' : 'line-clamp-3 truncate'}`}>{modalContent.query}</p>
+              </div>
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-blue-600 hover:underline mt-1"
+              >
+              </button>
+            </div>
+            <div>
+              <p><strong>Response:</strong></p>
+              <div className="max-h-[200px] overflow-y-auto">
+                <p className={`${isExpanded ? '' : 'line-clamp-3 truncate'}`}>{modalContent.response}</p>
+              </div>
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="text-blue-600 hover:underline mt-1"
+              >
+                {isExpanded ? 'Show Less' : 'Show More'}
+              </button>
+            </div>
+          </div>
+        )}
+        <button
+          onClick={closeModal}
+          className="mt-6 w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          Close
+        </button>
+      </Modal>
     </div>
   );
 };

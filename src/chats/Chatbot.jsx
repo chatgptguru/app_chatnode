@@ -109,7 +109,7 @@ const Chatbot = () => {
                     <div className='flex items-center gap-4'>
                         {messageLimit && (
                             <div className='text-sm text-gray-600'>
-                                Messages: {messages.length / 2}/{messageLimit}
+                                Messages: {Math.ceil(messages.length / 2)}/{messageLimit}
                             </div>
                         )}
                         <button className='p-2 rounded-full hover:bg-gray-100' onClick={() => {
@@ -149,7 +149,7 @@ const Chatbot = () => {
                         </div>
                     </div>
                 )}
-                {currentPlan === 'Free' && messages.length >= messageLimit && (
+                {currentPlan === 'Free' && (Math.ceil(messages.length / 2) >= messageLimit) && (
                     <div className="flex justify-center">
                         <div className="bg-blue-50 p-4 rounded-lg text-center">
                             <p className="text-blue-800 mb-2">You've reached the {messageLimit} message limit on the free plan</p>
