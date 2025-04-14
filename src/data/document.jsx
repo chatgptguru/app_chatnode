@@ -72,6 +72,7 @@ const Document = () => {
         const user_id = await localStorage.getItem('user_id');
         const token = await localStorage.getItem('token');
         formData.append("user_id", user_id);
+        formData.append("type", "document")
         setLoading(true);
         setMessage("");
 

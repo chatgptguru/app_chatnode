@@ -50,7 +50,9 @@ const Sources = ({ setSource }) => {
                     <div className='flex flex-col gap-3'>
                         <div className='text-sm font-semibold text-gray-500'>Integrations</div>
                         <div className='flex flex-col gap-2'>
-                            <div className='flex items-center justify-between p-3 transition duration-200 rounded-lg cursor-pointer hover:bg-gray-100'>
+                            <div className='flex items-center justify-between p-3 transition duration-200 rounded-lg cursor-pointer hover:bg-gray-100' onClick={()=>{
+                                setSource('googleDrive')
+                            }}>
                                 <div className='flex items-center gap-3'>
                                     <SiGoogledrive className='text-gray-500' />
                                     <span>Google Drive</span>
@@ -64,7 +66,9 @@ const Sources = ({ setSource }) => {
                                 </div>
                                 <span className='text-sm text-gray-400'>→</span>
                             </div>
-                            <div className='flex items-center justify-between p-3 transition duration-200 rounded-lg cursor-pointer hover:bg-gray-100'>
+                            <div className='flex items-center justify-between p-3 transition duration-200 rounded-lg cursor-pointer hover:bg-gray-100' onClick={()=>{
+                                setSource('oneDrive')
+                            }}>
                                 <div className='flex items-center gap-3'>
                                     <TbBrandOnedrive className='text-gray-500' />
                                     <span>OneDrive</span>

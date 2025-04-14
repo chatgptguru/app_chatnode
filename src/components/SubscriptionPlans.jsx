@@ -5,10 +5,13 @@ import { CheckCircle, X } from 'lucide-react';
 import Checkout from './CheckOut';
 import { Elements } from '@stripe/react-stripe-js';
 import axios from 'axios';
+import { useDispatch } from 'react-redux';
+import { setSubscriptionPlan } from '../store/reducers/layoutReducer';
 // const stripe = new Stripe(import.meta.env.VITE_STRIPE_SECRET_KEY);
 const stripePromise = loadStripe('pk_test_51P3fxGFfdHutdESI4G1kjXUgGyg73LDMxSnyyLJvHvJvCJ5JJ9Yw5EN6F8tkEkoWxkcxVLvt4kvvXUyD4bDDbMXS00G1Y5Ievn');
 
 export default function SubscriptionPlans() {
+  const dispatch = useDispatch();
   const [plans, setPlans] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -16,6 +19,7 @@ export default function SubscriptionPlans() {
   const [currentPlan, setCurrentPlan] = useState(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [planToSwitch, setPlanToSwitch] = useState(null);
+  const [isPaymentProcessing, setIsPaymentProcessing] = useState(false);
   const getCurrentPlan = async () => {
     const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/subscriptions/${localStorage.getItem('user_id')}`)
     console.log(response.data)
@@ -71,6 +75,11 @@ export default function SubscriptionPlans() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
+      {isPaymentProcessing && (
+        <div className="w-full h-full flex justify-center items-center absolute top-0 left-0 z-10 bg-black bg-opacity-80">
+          <div className="mysr-form w-[360px]"></div>
+        </div>
+      )}
       <div className="text-center">
         <h2 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">
           Choose Your Perfect Plan
@@ -86,8 +95,8 @@ export default function SubscriptionPlans() {
           <div
             key={plan.id}
             className={`relative flex flex-col rounded-2xl border shadow-xl transition-all duration-300 bg-white
-              ${currentPlan === plan.name 
-                ? 'border-blue-500 border-2 scale-105' 
+              ${currentPlan === plan.name
+                ? 'border-blue-500 border-2 scale-105'
                 : 'border-gray-200 hover:scale-105'
               }`}
           >
@@ -129,7 +138,7 @@ export default function SubscriptionPlans() {
                 onClick={() => handlePlanSelection(plan)}
                 disabled={currentPlan === plan.name}
                 className={`w-full rounded-lg py-4 px-6 text-center text-base font-semibold transition-all
-                  ${currentPlan === plan.name 
+                  ${currentPlan === plan.name
                     ? 'bg-gray-400 cursor-not-allowed'
                     : 'text-white bg-blue-600 hover:bg-blue-700'
                   }`}
@@ -147,7 +156,7 @@ export default function SubscriptionPlans() {
           <div className="bg-white rounded-2xl max-w-md w-full p-6">
             <h3 className="text-xl font-bold mb-4">Change Subscription Plan</h3>
             <p className="text-gray-600 mb-6">
-              You are about to switch from "{currentPlan}" to "{planToSwitch.name}". 
+              You are about to switch from "{currentPlan}" to "{planToSwitch.name}".
               Your new billing cycle will start immediately. Do you want to continue?
             </p>
             <div className="flex gap-4 justify-end">
@@ -165,6 +174,8 @@ export default function SubscriptionPlans() {
                   setShowConfirmModal(false);
                   setSelectedPlan(planToSwitch);
                   setPlanToSwitch(null);
+                  setIsPaymentProcessing(true);
+                  dispatch(setSubscriptionPlan(planToSwitch.name));
                 }}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
               >
@@ -179,12 +190,12 @@ export default function SubscriptionPlans() {
       {selectedPlan && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-auto">
-            <Elements stripe={stripePromise}>
-              <Checkout
-                plan={selectedPlan}
-                onClose={() => setSelectedPlan(null)}
-              />
-            </Elements>
+            {/* <Elements stripe={stripePromise}> */}
+            <Checkout
+              plan={selectedPlan}
+              onClose={() => setSelectedPlan(null)}
+            />
+            {/* </Elements> */}
           </div>
         </div>
       )}

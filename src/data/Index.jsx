@@ -6,6 +6,8 @@ import Source from './sources';
 import Website from './website';
 import Document from './document';
 import Text from './text';
+import GoogleDrive from './googleDrive';
+import OneDrive from './oneDrive';
 const Data = () => {
     const navigate = useNavigate();
     const [source, setSource] = useState('document');
@@ -16,6 +18,8 @@ const Data = () => {
                 {source === 'document' && <Document />}
                 {source === 'website' && <Website />}
                 {source === 'text' && <Text />}
+                {source === 'googleDrive' && <GoogleDrive />}
+                {source === 'oneDrive' && <OneDrive />}
             </div>
         </div>
     );

@@ -3,7 +3,7 @@ import { FiMessageSquare } from 'react-icons/fi';
 import Chats from '../chats/Index';
 import Data from '../data/Index';
 import Chatbot from '../chats/Chatbot';
-
+import Settings from '../settings/index';
 const Bot = () => {
     const [currentPage, setCurrentPage] = useState('Chats');
     return (
@@ -41,6 +41,9 @@ const Bot = () => {
                 }
                 {currentPage == 'Data' &&
                     <Data></Data>
+                }
+                {currentPage == 'Settings' &&
+                    <Settings></Settings>
                 }
                 <Chatbot></Chatbot>
             </div>

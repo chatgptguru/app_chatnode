@@ -23,6 +23,7 @@ import HelpSupport from './admin/HelpSupport';
 import SubscriptionPlans from './components/SubscriptionPlans';
 import AdminLogin from './admin/AdminLogin';
 import ProtectedRoute from './admin/ProtectedRoute';
+import PaymentSuccess from './components/PaymentSuccess';
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/signin" element={<SignIn />} />
               <Route path="/subscription-plans" element={<SubscriptionPlans />} />
+              <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/" element={<Layout />} >
                 <Route path="/" element={<Dashboard />} />
                 <Route path="*" element={<NotFound />} />

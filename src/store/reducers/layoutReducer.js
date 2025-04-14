@@ -6,6 +6,7 @@ const initialState = {
   isBotBarOpen: false,
   teamName: '',
   teamId: '',
+  subscriptionPlan: null,
 };
 
 const layoutSlice = createSlice({
@@ -27,8 +28,11 @@ const layoutSlice = createSlice({
     setTeamId: (state, action) => {
       state.teamId = action.payload;
     },
+    setSubscriptionPlan: (state, action) => {
+      state.subscriptionPlan = action.payload;
+    },
   },
 });
 
-export const { setIsSideBarOpen, setIsTeamBarOpen, setIsBotBarOpen, setTeamName, setTeamId } = layoutSlice.actions;
+export const { setIsSideBarOpen, setIsTeamBarOpen, setIsBotBarOpen, setTeamName, setTeamId, setSubscriptionPlan } = layoutSlice.actions;
 export default layoutSlice.reducer; 
