@@ -16,17 +16,14 @@ const GoogleDrive = () => {
     const [selectedFiles, setSelectedFiles] = useState([]);
 
     useEffect(() => {
-        if (isDriveConnected) {
-            fetchDriveFiles();
-        }
-    }, [isDriveConnected, currentFolder]);
+        fetchDriveFiles();
+    }, []);
 
     const fetchDriveFiles = async () => {
         setLoading(true);
         try {
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/drive-files`, {
                 user_id: localStorage.getItem('user_id'),
-                folder_id: currentFolder
             });
             setDriveFiles(response.data.files);
         } catch (error) {
@@ -76,7 +73,7 @@ const GoogleDrive = () => {
                         onFileSelect={handleFileSelect}
                         className="w-full"
                     />
-                    
+
                     {/* Selected Files */}
                     {selectedFiles.length > 0 && (
                         <div className='mt-6 p-4 bg-white rounded-lg shadow-md'>
@@ -85,9 +82,8 @@ const GoogleDrive = () => {
                                 {selectedFiles.map(file => (
                                     <div key={file.id} className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'>
                                         <div className='flex items-center gap-3'>
-                                            <img src={file.iconUrl} alt="" className='w-6 h-6' />
                                             <span className='text-sm font-medium text-gray-700 truncate max-w-[200px]'>
-                                                {file.name}
+                                                {file.file_name}
                                             </span>
                                         </div>
                                         <button
@@ -112,9 +108,8 @@ const GoogleDrive = () => {
                                 {index > 0 && <span>/</span>}
                                 <button
                                     onClick={() => handleBreadcrumbClick(index)}
-                                    className={`hover:text-blue-500 ${
-                                        index === folderPath.length - 1 ? 'font-semibold text-blue-500' : ''
-                                    }`}
+                                    className={`hover:text-blue-500 ${index === folderPath.length - 1 ? 'font-semibold text-blue-500' : ''
+                                        }`}
                                 >
                                     {folder.name}
                                 </button>
@@ -138,7 +133,7 @@ const GoogleDrive = () => {
                                     )}
                                 </div>
                                 <div className='text-center'>
-                                    <p className='font-medium text-gray-700 truncate'>{file.name}</p>
+                                    <p className='font-medium text-gray-700 truncate'>{file.file_name}</p>
                                     <p className='text-xs text-gray-500'>
                                         {file.modifiedTime && new Date(file.modifiedTime).toLocaleDateString()}
                                     </p>
