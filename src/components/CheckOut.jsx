@@ -57,7 +57,7 @@ const Checkout = ({ plan, onClose }) => {
             currency: 'USD',
             description: `Subscription to ${plan.name}`,
             publishable_api_key: 'pk_test_PtXX7r1XnRAQnV5uFNQMqReydsEQ2Xj4VahYnAyB',
-            callback_url: 'http://localhost:3000/payment-success?subscriptionPlan=' + subscriptionPlan,
+            callback_url: 'https://testrag.exrelay.com/payment-success?subscriptionPlan=' + subscriptionPlan,
             methods: ['creditcard'],
             on_completed: function (payment) {
                 return new Promise(function (resolve, reject) {
