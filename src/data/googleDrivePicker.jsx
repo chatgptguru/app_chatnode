@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { FaGoogle, FaFile, FaImage, FaFilePdf } from 'react-icons/fa';
-
+import { useParams } from 'react-router-dom';
 const GoogleDrivePicker = ({ onFileSelect, className }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-
+    const { botId } = useParams();
     const loadGooglePicker = (accessToken) => {
         setIsLoading(true);
         setError(null);
@@ -79,7 +79,7 @@ const GoogleDrivePicker = ({ onFileSelect, className }) => {
                             const token = await localStorage.getItem('token');
                             formData.append("user_id", user_id);
                             formData.append("type", "google_drive");
-
+                            formData.append("bot_id", botId);
                             const uploadResponse = await fetch(`${import.meta.env.VITE_API_URL}/api/upload-pdf`, {
                                 method: "POST",
                                 body: formData,

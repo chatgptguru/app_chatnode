@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FaGlobe, FaSpinner } from 'react-icons/fa'; // Added loading spinner icon
 import axios from 'axios';
 
@@ -9,6 +9,7 @@ const Website = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [url, setUrl] = useState('');
+    const { botId } = useParams();
 
     // Fetch websites on component mount
     useEffect(() => {
@@ -18,7 +19,8 @@ const Website = () => {
     const fetchWebsites = async () => {
         try {
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/websites`, {
-                user_id: localStorage.getItem('user_id') // Assuming user_id is stored in localStorage
+                user_id: localStorage.getItem('user_id'), // Assuming user_id is stored in localStorage
+                bot_id: botId
             });
             setWebsites(response.data.websites);
         } catch (err) {
@@ -39,7 +41,8 @@ const Website = () => {
         try {
             const data = {
                 url: url,
-                user_id: localStorage.getItem('user_id')
+                user_id: localStorage.getItem('user_id'),
+                bot_id: botId
             };
             
             const response = await axios.post(

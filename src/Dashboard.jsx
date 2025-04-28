@@ -7,7 +7,7 @@ import { HiOutlineSelector } from "react-icons/hi";
 import { LuSettings } from "react-icons/lu";
 import { FaRegUserCircle } from "react-icons/fa";
 import { FaAngleDown } from "react-icons/fa";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Outlet } from 'react-router-dom';
 import Bot from './bot/Index';
 import Team from './team/Index';
 import { useDispatch, useSelector } from 'react-redux';
@@ -51,7 +51,8 @@ const Dashboard = () => {
             const response = await axios.get(`/api/teams/user/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            setTeams(response.data);
+            console.log(response.data);
+            // setTeams(response.data);
             // Set default selected team if none selected
             if (!selectedTeam && response.data.length > 0) {
                 setSelectedTeam(response.data[0]);
@@ -145,7 +146,9 @@ const Dashboard = () => {
                     )}
                 </div>
                 <div className='flex items-center gap-2'>
-                    <div className='flex items-center gap-2 bg-blue-300 rounded-3xl px-2 py-1 font-bold cursor-pointer shadow-lg' onClick={() => dispatch(setIsTeamBarOpen(false))}>
+                    <div className='flex items-center gap-2 bg-blue-300 rounded-3xl px-2 py-1 font-bold cursor-pointer shadow-lg' onClick={() => {
+                        navigate('/bots')
+                    }}>
                         Chatbots
                     </div>
                     <div className='relative'>
@@ -174,8 +177,7 @@ const Dashboard = () => {
                     </div>
                 </div>
             </div>
-            {isTeamBarOpen ? <Team /> : <Bot />}
-
+            <Outlet />
             {/* Create Team Modal */}
             {isShowCreateTeamModal && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" onClick={() => setIsShowCreateTeamModal(false)}>

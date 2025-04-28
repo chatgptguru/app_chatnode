@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { FaFile } from "react-icons/fa";
 import axios from "axios";
 import Modal from "react-modal"; // Import a modal library
@@ -22,6 +22,7 @@ const Document = () => {
         start: subMonths(new Date(), 1), // 1 month ago
         end: new Date() // current date
     });
+    const { botId } = useParams();
     const [currentPlan, setCurrentPlan] = useState(null);
 
     const handleFileChange = (event) => {
@@ -73,6 +74,7 @@ const Document = () => {
         const token = await localStorage.getItem('token');
         formData.append("user_id", user_id);
         formData.append("type", "document")
+        formData.append("bot_id", botId)
         setLoading(true);
         setMessage("");
 
@@ -105,7 +107,8 @@ const Document = () => {
         const user_id = await localStorage.getItem('user_id');
         const token = await localStorage.getItem('token');
         const data = {
-            user_id: user_id
+            user_id: user_id,
+            bot_id: botId
         }
         const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/documents`, data, {
             headers: {

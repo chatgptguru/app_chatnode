@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FaAlignLeft } from 'react-icons/fa'; // Icon for Websites
 import axios from 'axios';
 
 const Text = () => {
     const navigate = useNavigate();
+    const { botId } = useParams();
     const [text, setText] = useState(''); // State to store the text input
     const [texts, setTexts] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -19,7 +20,8 @@ const Text = () => {
     const fetchTexts = async () => {
         try {
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/texts`, {
-                user_id: localStorage.getItem('user_id')
+                user_id: localStorage.getItem('user_id'),
+                bot_id: botId
             });
             setTexts(response.data.texts);
         } catch (error) {
@@ -39,7 +41,8 @@ const Text = () => {
         
         const data = {
             text: text,
-            user_id: localStorage.getItem('user_id')
+            user_id: localStorage.getItem('user_id'),
+            bot_id: botId
         };
 
         try {

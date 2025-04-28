@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { setTopicId } from '../store/reducers/chatReducer';
-
+import { useParams } from 'react-router-dom';
 const History = () => {
     const dispatch = useDispatch()
     const [histories, setHistories] = useState([
@@ -12,6 +12,7 @@ const History = () => {
     const [filterByStatus, setFilterByStatus] = useState('All');
     const [showModal, setShowModal] = useState(false);
     const [selectedTopicId, setSelectedTopicId] = useState(null);
+    const { botId } = useParams();
     const filteredHistories = histories
         .filter(history => filterByType === 'All' || history.type === filterByType)
         .filter(history => filterByStatus === 'All' || history.status === filterByStatus)
@@ -19,7 +20,8 @@ const History = () => {
     const getTopics = async () => {
         const user_id = await localStorage.getItem('user_id')
         const data = {
-            user_id
+            user_id,
+            bot_id: botId
         }
         const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/topics`, data, {
             headers: {

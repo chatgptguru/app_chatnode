@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { FaAlignLeft, FaGoogle, FaFileUpload, FaFile, FaFolder, FaFolderOpen, FaArrowLeft, FaDownload, FaTrash } from 'react-icons/fa';
 import axios from 'axios';
 import GoogleDrivePicker from './googleDrivePicker';
@@ -14,7 +14,7 @@ const GoogleDrive = () => {
     const [currentFolder, setCurrentFolder] = useState('root');
     const [folderPath, setFolderPath] = useState([{ id: 'root', name: 'My Drive' }]);
     const [selectedFiles, setSelectedFiles] = useState([]);
-
+    const { botId } = useParams();
     useEffect(() => {
         fetchDriveFiles();
     }, []);
@@ -24,6 +24,7 @@ const GoogleDrive = () => {
         try {
             const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/drive-files`, {
                 user_id: localStorage.getItem('user_id'),
+                bot_id: botId
             });
             setDriveFiles(response.data.files);
         } catch (error) {
