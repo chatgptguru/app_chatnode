@@ -35,9 +35,7 @@ const PopupChat = () => {
                 <pre className="text-gray-100 font-mono text-sm">
                     <code>
                         {`<script
-    type="text/javascript"
     src="${import.meta.env.VITE_APP_URL}/popup.js"
-    async
 ></script>`}
                     </code>
                 </pre>
