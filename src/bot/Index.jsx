@@ -60,7 +60,7 @@ const Bot = () => {
                 <Outlet />
                 {isChatbotBarOpen && (
                     <div className='w-[460px] h-[800px]'>
-                        <Chatbot></Chatbot>
+                        <Chatbot enable={true}></Chatbot>
                     </div>
                 )}
             </div>

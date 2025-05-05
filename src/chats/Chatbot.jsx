@@ -6,7 +6,7 @@ import { toast } from 'react-toastify';
 import { useParams } from 'react-router-dom';
 const socket = io(`${import.meta.env.VITE_API_URL}`);
 
-const Chatbot = () => {
+const Chatbot = ({ enable }) => {
     const [messages, setMessages] = useState([]);
     const messages_ref = useRef([])
     const [inputText, setInputText] = useState('');
@@ -115,7 +115,7 @@ const Chatbot = () => {
     }
     return (
         <>
-            {bot ? (
+            {(bot.public || enable) ? (
                 <div className='mx-auto bg-gray-50 rounded-lg shadow-lg flex flex-col w-full h-full'>
                     <div className='p-4 border-b rounded-t-lg bg-blue-600'>
                         <div className='flex items-center justify-between'>
