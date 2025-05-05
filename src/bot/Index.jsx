@@ -59,7 +59,7 @@ const Bot = () => {
             <div className='flex w-full h-full justify-between items-start'>
                 <Outlet />
                 {isChatbotBarOpen && (
-                    <div className='h-full w-[500px]'>
+                    <div className='w-[460px] h-[800px]'>
                         <Chatbot></Chatbot>
                     </div>
                 )}

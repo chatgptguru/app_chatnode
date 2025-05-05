@@ -16,6 +16,17 @@ const Bots = () => {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [botToDelete, setBotToDelete] = useState(null);
     const [newBotName, setNewBotName] = useState('');
+    const [chatbotLimit, setChatbotLimit] = useState(0);
+    const getCurrentPlan = async () => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/subscriptions/${localStorage.getItem('user_id')}`)
+            setChatbotLimit(response.data.chatbot_limit);
+        } catch (error) {
+            console.error('Error fetching plan:', error);
+            toast.error('Failed to fetch subscription plan');
+        }
+    }
+
 
     const fetchBots = async () => {
         const token = await localStorage.getItem('token');
@@ -32,6 +43,7 @@ const Bots = () => {
         }
     };
     useEffect(() => {
+        getCurrentPlan();
         fetchBots();
     }, []);
 
@@ -50,6 +62,10 @@ const Bots = () => {
     ];
 
     const handleCreateBot = () => {
+        if (bots.length >= chatbotLimit) {
+            toast.error('You have reached the maximum number of chatbots for your plan');
+            return;
+        }
         setIsModalOpen(true);
     };
 
@@ -143,8 +159,9 @@ const Bots = () => {
                     <div className="flex justify-between items-center mb-6">
                         <h1 className="text-2xl font-semibold">Chatbots</h1>
                         <button
+                            disabled={bots.length >= chatbotLimit}
                             onClick={handleCreateBot}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             <FiPlus /> Create Bot
                         </button>

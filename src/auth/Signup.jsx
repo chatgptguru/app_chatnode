@@ -9,7 +9,7 @@ const SignUp = () => {
     const navigate = useNavigate();
     useEffect(() => {
         if (localStorage.getItem('isSigned')) {
-            navigate('/dashboard');
+            navigate('/bots');
         }
     }, [])
     const [email, setEmail] = useState("")
@@ -53,7 +53,7 @@ const SignUp = () => {
                     await localStorage.setItem('token', response.data.token);
                     await localStorage.setItem('isSigned', true);
                     await localStorage.setItem('user_id', response.data.user_id);
-                    navigate('/');
+                    navigate('/bots');
                 } else {
                     toast.error(response.data.message)
                 }

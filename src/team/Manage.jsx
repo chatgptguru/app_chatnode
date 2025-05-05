@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-
-const Manage = () => {
-    const teamName = useSelector((state) => state.layout.teamName);
-    const teamId = useSelector((state) => state.layout.teamId);
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { useDispatch } from 'react-redux';
+import { useParams } from 'react-router-dom';
+const Manage = ({ teamId, teamName, teamMembers }) => {
     const dispatch = useDispatch();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);

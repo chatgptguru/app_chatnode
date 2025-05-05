@@ -29,7 +29,16 @@ const Dashboard = () => {
     const [teams, setTeams] = useState([]);
     const [selectedTeam, setSelectedTeam] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-
+    const [teamLimit, setTeamLimit] = useState(0);
+    const getCurrentPlan = async () => {
+        try {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/subscriptions/${localStorage.getItem('user_id')}`)
+            setTeamLimit(response.data.team_limit);
+        } catch (error) {
+            console.error('Error fetching plan:', error);
+            toast.error('Failed to fetch subscription plan');
+        }
+    }
     const allHideDropDown = () => {
         if (isShowUserDrowDown)
             setIsShowUserDrowDown(false)
@@ -39,6 +48,7 @@ const Dashboard = () => {
 
     // Fetch teams on component mount
     useEffect(() => {
+        getCurrentPlan();
         fetchTeams();
     }, []);
 
@@ -48,7 +58,7 @@ const Dashboard = () => {
             const token = localStorage.getItem('token');
             const userId = localStorage.getItem('user_id');
 
-            const response = await axios.get(`/api/teams/user/${userId}`, {
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/teams/user/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             console.log(response.data);
@@ -76,16 +86,16 @@ const Dashboard = () => {
             const token = localStorage.getItem('token');
             const userId = localStorage.getItem('user_id');
 
-            const response = await axios.post('/api/teams', 
+            const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/teams`,
                 {
                     name: newTeamName,
                     user_id: userId,
                 },
-                { 
+                {
                     headers: { Authorization: `Bearer ${token}` }
                 }
             );
-            
+
             // Add new team to list
             setTeams([...teams, response.data]);
             setNewTeamName('');
@@ -121,13 +131,14 @@ const Dashboard = () => {
                                     <div className="px-2 py-2">No teams found</div>
                                 ) : (
                                     teams.map((team) => (
-                                        <div 
+                                        <div
                                             key={team.id}
                                             onClick={() => {
                                                 setSelectedTeam(team);
                                                 dispatch(setIsTeamBarOpen(true));
                                                 setIsShowTeamDrowDown(false);
-                                            }} 
+                                                navigate(`/team/${team.id}`);
+                                            }}
                                             className='flex items-center justify-between w-full px-1 py-2 cursor-pointer rounded-xl hover:bg-gray-300'
                                         >
                                             <div>{team.name}</div>
@@ -136,7 +147,11 @@ const Dashboard = () => {
                                     ))
                                 )}
                             </div>
-                            <div className='px-2 py-2 rounded-lg hover:bg-gray-500' onClick={() => {
+                            <div className='px-2 py-2 rounded-lg hover:bg-gray-500 cursor-pointer' onClick={() => {
+                                if (teams.length >= teamLimit) {
+                                    toast.error('You have reached the maximum number of teams for your plan');
+                                    return;
+                                }
                                 setIsShowCreateTeamModal(true);
                                 setIsShowTeamDrowDown(false);
                             }}>

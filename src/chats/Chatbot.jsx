@@ -116,7 +116,7 @@ const Chatbot = () => {
     return (
         <>
             {bot ? (
-                <div className='mx-auto bg-gray-50 rounded-lg shadow-lg flex flex-col w-[460px] h-[800px]'>
+                <div className='mx-auto bg-gray-50 rounded-lg shadow-lg flex flex-col w-full h-full'>
                     <div className='p-4 border-b rounded-t-lg bg-blue-600'>
                         <div className='flex items-center justify-between'>
                             <div className='flex items-center gap-2'>

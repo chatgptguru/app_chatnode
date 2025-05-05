@@ -562,13 +562,26 @@ class ChatWidget {
     }
 }
 
+function getBotIdFromScript() {
+    // Find the script tag that loaded this file
+    const scripts = document.getElementsByTagName('script');
+    for (let script of scripts) {
+        if (script.src && script.src.includes('popup.js')) {
+            const url = new URL(script.src, window.location.origin);
+            return url.searchParams.get('bot_id');
+        }
+    }
+    return null;
+}
+
 // Make it available globally and initialize
 window.ChatWidget = ChatWidget;
 window.addEventListener('DOMContentLoaded', () => {
+    const botId = getBotIdFromScript() || 'YOUR_BOT_ID';
     new ChatWidget({
         apiUrl: 'https://testragapi.exrelay.com',
-        botId: 'YOUR_BOT_ID',
+        botId: botId,
         messageLimit: 10,
         currentPlan: 'Free'
     });
-}); 
+});

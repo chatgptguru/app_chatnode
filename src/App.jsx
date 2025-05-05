@@ -37,6 +37,7 @@ import Share from './share/index';
 import Analytics from './analytics/index';
 import Bots from './bots/Index';
 import Chatbot from './chats/Chatbot';
+import LandingPage from './landingPage/index';
 function App() {
   return (
     <Provider store={store}>
@@ -50,6 +51,7 @@ function App() {
               <Route path="/subscription-plans" element={<SubscriptionPlans />} />
               <Route path="/payment-success" element={<PaymentSuccess />} />
               <Route path="/chatbot/:botId" element={<div className='h-screen'><Chatbot /></div>} />
+              <Route path="/" element={<LandingPage />} />
               <Route path="/" element={<Layout />} >
                 <Route path="/" element={<Dashboard />} >
                   <Route path="bots" element={<Bots />} >
@@ -66,7 +68,7 @@ function App() {
                     <Route path="share" element={<Share />} />
                     <Route path="analytics" element={<Analytics />} />
                   </Route>
-                  <Route path="team" element={<Team />} />
+                  <Route path="team/:teamId" element={<Team />} />
                 </Route>
                 <Route path="*" element={<NotFound />} />
               </Route>

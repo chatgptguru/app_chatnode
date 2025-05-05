@@ -45,6 +45,9 @@ const SubscriptionsManagement = () => {
             features: [''],
             chatLimit: 0,
             documentLimit: 0,
+            chatbotLimit: 0,
+            teamLimit: 0,
+            memberLimit: 0,
             isActive: true
         });
         setIsCreating(true);
@@ -78,7 +81,7 @@ const SubscriptionsManagement = () => {
                         }
                     }
                 );
-                setPlans(plans.map(p => 
+                setPlans(plans.map(p =>
                     p.id === editingPlan.id ? editingPlan : p
                 ));
                 toast.success('Plan updated successfully');
@@ -105,8 +108,8 @@ const SubscriptionsManagement = () => {
                     }
                 }
             );
-            setPlans(plans.map(p => 
-                p.id === planId ? {...p, isActive: newStatus} : p
+            setPlans(plans.map(p =>
+                p.id === planId ? { ...p, isActive: newStatus } : p
             ));
             toast.success('Plan status updated successfully');
         } catch (error) {
@@ -147,14 +150,29 @@ const SubscriptionsManagement = () => {
         <div>
             <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold">Subscriptions Management</h2>
-                <button 
-                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-                    onClick={handleCreatePlan}
-                >
-                    Create New Plan
-                </button>
+                <div className='flex gap-2'>
+                    <button
+                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                        onClick={async () => {
+                            const response = await axios.get(`${import.meta.env.VITE_API_URL}/create_plans`);
+                            if (response.status === 200) {
+                                toast.success('Auto-Pricing Plan created successfully');
+                            } else {
+                                toast.error('Failed to create Auto-Pricing Plan');
+                            }
+                        }}
+                    >
+                        Create Auto-Pricing Plan
+                    </button>
+                    <button
+                        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+                        onClick={handleCreatePlan}
+                    >
+                        Create New Plan
+                    </button>
+                </div>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {plans.map((plan) => (
                     <div key={plan.id} className="bg-white rounded-lg shadow p-6">
@@ -167,6 +185,9 @@ const SubscriptionsManagement = () => {
                             <div className="mt-4 text-gray-600">
                                 <p>Chat Limit: {plan.chatLimit} messages</p>
                                 <p>Document Limit: {plan.documentLimit} files</p>
+                                <p>Chatbot Limit: {plan.chatbotLimit} chatbots</p>
+                                <p>Team Limit: {plan.teamLimit} teams</p>
+                                <p>Member Limit: {plan.memberLimit} members</p>
                             </div>
                             <ul className="mt-6 space-y-2">
                                 {plan.features.map((feature, index) => (
@@ -187,16 +208,16 @@ const SubscriptionsManagement = () => {
                                 </label>
                             </div>
                             <div className="flex justify-between mt-4 gap-4 w-full">
-                                <button 
+                                <button
                                     className="mt-4 w-full bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
                                     onClick={() => handleEditPlan(plan)}
-                            >
-                                Edit Plan
-                            </button>
-                            <button 
-                                className="mt-4 w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-                                onClick={() => handleDeletePlan(plan.id)}
-                            >
+                                >
+                                    Edit Plan
+                                </button>
+                                <button
+                                    className="mt-4 w-full bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                                    onClick={() => handleDeletePlan(plan.id)}
+                                >
                                     Delete Plan
                                 </button>
                             </div>
@@ -218,7 +239,7 @@ const SubscriptionsManagement = () => {
                                 <input
                                     type="text"
                                     value={editingPlan.name}
-                                    onChange={(e) => setEditingPlan({...editingPlan, name: e.target.value})}
+                                    onChange={(e) => setEditingPlan({ ...editingPlan, name: e.target.value })}
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 />
                             </div>
@@ -227,7 +248,7 @@ const SubscriptionsManagement = () => {
                                 <input
                                     type="number"
                                     value={editingPlan.price}
-                                    onChange={(e) => setEditingPlan({...editingPlan, price: parseFloat(e.target.value)})}
+                                    onChange={(e) => setEditingPlan({ ...editingPlan, price: parseFloat(e.target.value) })}
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 />
                             </div>
@@ -236,7 +257,7 @@ const SubscriptionsManagement = () => {
                                 <input
                                     type="number"
                                     value={editingPlan.chatLimit}
-                                    onChange={(e) => setEditingPlan({...editingPlan, chatLimit: parseInt(e.target.value)})}
+                                    onChange={(e) => setEditingPlan({ ...editingPlan, chatLimit: parseInt(e.target.value) })}
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 />
                             </div>
@@ -245,7 +266,34 @@ const SubscriptionsManagement = () => {
                                 <input
                                     type="number"
                                     value={editingPlan.documentLimit}
-                                    onChange={(e) => setEditingPlan({...editingPlan, documentLimit: parseInt(e.target.value)})}
+                                    onChange={(e) => setEditingPlan({ ...editingPlan, documentLimit: parseInt(e.target.value) })}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Chatbot Limit</label>
+                                <input
+                                    type="number"
+                                    value={editingPlan.chatbotLimit}
+                                    onChange={(e) => setEditingPlan({ ...editingPlan, chatbotLimit: parseInt(e.target.value) })}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Team Limit</label>
+                                <input
+                                    type="number"
+                                    value={editingPlan.teamLimit}
+                                    onChange={(e) => setEditingPlan({ ...editingPlan, teamLimit: parseInt(e.target.value) })}
+                                    className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700">Member Limit</label>
+                                <input
+                                    type="number"
+                                    value={editingPlan.memberLimit}
+                                    onChange={(e) => setEditingPlan({ ...editingPlan, memberLimit: parseInt(e.target.value) })}
                                     className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                 />
                             </div>
@@ -259,7 +307,7 @@ const SubscriptionsManagement = () => {
                                             onChange={(e) => {
                                                 const newFeatures = [...editingPlan.features];
                                                 newFeatures[index] = e.target.value;
-                                                setEditingPlan({...editingPlan, features: newFeatures});
+                                                setEditingPlan({ ...editingPlan, features: newFeatures });
                                             }}
                                             className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                                         />
@@ -267,7 +315,7 @@ const SubscriptionsManagement = () => {
                                             type="button"
                                             onClick={() => {
                                                 const newFeatures = editingPlan.features.filter((_, i) => i !== index);
-                                                setEditingPlan({...editingPlan, features: newFeatures});
+                                                setEditingPlan({ ...editingPlan, features: newFeatures });
                                             }}
                                             className="text-red-500"
                                         >
