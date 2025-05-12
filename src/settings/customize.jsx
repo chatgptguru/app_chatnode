@@ -8,13 +8,18 @@ import {
     IoSendOutline,
     IoHelpCircleOutline,
     IoChevronForwardOutline,
-    IoRefreshOutline
+    IoRefreshOutline,
+    IoPaperPlaneOutline,
+    IoChatboxEllipsesOutline
 } from 'react-icons/io5';
 import {
     HiOutlineChatBubbleLeftRight,
     HiOutlineChatBubbleLeft,
     HiOutlineQuestionMarkCircle
 } from 'react-icons/hi2';
+import { useDispatch, useSelector } from 'react-redux';
+import { setDefaultSettings } from '../store/reducers/layoutReducer';
+import { useParams } from 'react-router-dom';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
 
@@ -34,65 +39,6 @@ const updateSettings = async (settings) => {
     const user_id = await localStorage.getItem('user_id');
     const res = await axios.put(`${API_BASE_URL}/api/settings?user_id=${user_id}`, settings);
     return res.data;
-};
-
-const defaultSettings = {
-    theme: {
-        primaryColor: "#4169E1",
-        backgroundColor: "#FFFFFF"
-    },
-    header: {
-        enabled: true,
-        title: "AI Chatbot",
-        titleColor: "#FFFFFF",
-        statusEnabled: true,
-        statusText: "Online",
-        statusColor: "#4CAF50",
-        shadow: "#E5E5E5",
-        resetButton: "#FFFFFF",
-        background: "#4169E1"
-    },
-    chatBubbles: {
-        greeting: "What can I help you with?",
-        botBubbleBg: "#000000",
-        botBubbleText: "#FFFFFF",
-        userBubbleBg: "#4169E1",
-        userBubbleText: "#FFFFFF",
-        feedback: true,
-        soundEffect: false
-    },
-    chatInput: {
-        text: "",
-        textColor: "#000000",
-        background: "#FFFFFF",
-        border: "#E5E5E5",
-        sendButton: "#000000"
-    },
-    suggestedQuestions: {
-        questions: ["Who Are You?", "What is your purpose?"]
-    },
-    popupMessage: {
-        enabled: true,
-        message1: "Need help?",
-        message2: "Type your message",
-        text: "#000000",
-        background: "#FFFFFF",
-        border: "#E5E5E5"
-    },
-    popupButton: {
-        openByDefault: true,
-        buttonOnRight: true,
-        background: "#4169E1",
-        icon: "#FFFFFF"
-    },
-    userInfo: {
-        collectName: true,
-        collectEmail: true,
-        collectPhone: true,
-        submitButton: "Start Chatting",
-        privacyPolicy: true
-    }
-    // ...add for RemoveChatNodeBranding, CustomIcons if needed
 };
 
 const SettingSection = ({ title, children, icon: Icon }) => {
@@ -150,7 +96,7 @@ const TextInput = ({ label, value, onChange, placeholder, icon: Icon }) => (
     </div>
 );
 
-const Button = ({ children, variant = 'primary', icon: Icon }) => {
+const Button = ({ children, variant = 'primary', icon: Icon, onClick }) => {
     const baseClasses = "flex items-center justify-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors";
     const variants = {
         primary: "bg-blue-600 text-white hover:bg-blue-700",
@@ -159,63 +105,105 @@ const Button = ({ children, variant = 'primary', icon: Icon }) => {
     };
 
     return (
-        <button className={`${baseClasses} ${variants[variant]}`}>
+        <button className={`${baseClasses} ${variants[variant]}`} onClick={onClick}>
             {Icon && <Icon className="w-5 h-5" />}
             {children}
         </button>
     );
 };
 
-const ChatBubbles = ({ settings, onChange }) => (
-    <SettingSection title="Chat Bubbles" icon={HiOutlineChatBubbleLeftRight}>
-        <div className="space-y-4">
-            <TextInput
-                label="Greeting"
-                value={settings.greeting}
-                onChange={e => onChange({ ...settings, greeting: e.target.value })}
-                placeholder="What can I help you with?"
-                icon={IoHelpCircleOutline}
-            />
-            <ColorPicker label="Bot Bubble Background" value={settings.botBubbleBg} onChange={e => onChange({ ...settings, botBubbleBg: e.target.value })} />
-            <ColorPicker label="Bot Bubble Text" value={settings.botBubbleText} onChange={e => onChange({ ...settings, botBubbleText: e.target.value })} />
-            <ColorPicker label="User Bubble Background" value={settings.userBubbleBg} onChange={e => onChange({ ...settings, userBubbleBg: e.target.value })} />
-            <ColorPicker label="User Bubble Text" value={settings.userBubbleText} onChange={e => onChange({ ...settings, userBubbleText: e.target.value })} />
-            <Toggle label="Feedback" checked={settings.feedback} onChange={e => onChange({ ...settings, feedback: e.target.checked })} />
-            <Toggle label="Sound Effect" checked={settings.soundEffect} onChange={e => onChange({ ...settings, soundEffect: e.target.checked })} />
-            <Button variant="upgrade" icon={IoImageOutline}>Upgrade for Avatar Image</Button>
-        </div>
-    </SettingSection>
-);
+const ChatBubbles = ({ settings, onChange }) => {
+    const [messages, setMessages] = useState([
+        {
+            type: "user",
+            content: "Hello, how are you?"
+        },
+        {
+            type: "bot",
+            content: "I'm fine, thank you!"
+        },
+        {
+            type: "user",
+            content: "What is your name?"
+        },
+        {
+            type: "bot",
+            content: "My name is ChatNode!"
+        }
+    ]);
+    return (
+        <SettingSection title="Chat Bubbles" icon={HiOutlineChatBubbleLeftRight}>
+            <div className='flex gap-4 w-full h-full'>
+                <div className="space-y-4 w-[50%] border-r border-gray-200 pr-4">
+                    <TextInput
+                        label="Greeting"
+                        value={settings.greeting}
+                        onChange={e => onChange({ ...settings, greeting: e.target.value })}
+                        placeholder="What can I help you with?"
+                        icon={IoHelpCircleOutline}
+                    />
+                    <ColorPicker label="Bot Bubble Background" value={settings.botBubbleBg} onChange={e => onChange({ ...settings, botBubbleBg: e.target.value })} />
+                    <ColorPicker label="Bot Bubble Text" value={settings.botBubbleText} onChange={e => onChange({ ...settings, botBubbleText: e.target.value })} />
+                    <ColorPicker label="User Bubble Background" value={settings.userBubbleBg} onChange={e => onChange({ ...settings, userBubbleBg: e.target.value })} />
+                    <ColorPicker label="User Bubble Text" value={settings.userBubbleText} onChange={e => onChange({ ...settings, userBubbleText: e.target.value })} />
+                    <Toggle label="Feedback" checked={settings.feedback} onChange={e => onChange({ ...settings, feedback: e.target.checked })} />
+                    <Toggle label="Sound Effect" checked={settings.soundEffect} onChange={e => onChange({ ...settings, soundEffect: e.target.checked })} />
+                    {/* <Button variant="upgrade" icon={IoImageOutline}>Upgrade for Avatar Image</Button> */}
+                </div>
+                <div className='w-[50%]'>
+                    {messages.map((message, index) => (
+                        <div key={index} className={`flex ${message.type === "user" ? 'justify-end' : 'justify-start'}`}>
+                            <div
+                                className={`max-w-[95%] p-4 rounded-lg ${message.type === "user"
+                                    ? `bg-[${settings.userBubbleBg}] text-[${settings.userBubbleText}]`
+                                    : message.isError
+                                        ? `bg-[${settings.botBubbleBg}] text-[${settings.botBubbleText}]`
+                                        : `bg-[${settings.botBubbleBg}] text-[${settings.botBubbleText}]`
+                                    }`}
+                            >
+                                <div className='text-sm whitespace-pre-wrap'>{message.content}</div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </SettingSection>
+    );
+};
 
 const ChatInput = ({ settings, onChange }) => {
     return (
         <SettingSection title="Chat Input" icon={IoSendOutline}>
-            <div className="space-y-4">
-                <div className="setting-item">
-                    <TextInput
-                        label="Text"
-                        value={settings.text}
-                        onChange={e => onChange({ ...settings, text: e.target.value })}
-                        placeholder="Type your message"
-                        icon={HiOutlineChatBubbleLeft}
-                    />
-                    <ColorPicker label="Text Color" value={settings.textColor} onChange={e => onChange({ ...settings, textColor: e.target.value })} />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <ColorPicker label="Background" value={settings.background} onChange={e => onChange({ ...settings, background: e.target.value })} />
-                    <ColorPicker label="Border" value={settings.border} onChange={e => onChange({ ...settings, border: e.target.value })} />
-                    <ColorPicker label="Send Button" value={settings.sendButton} onChange={e => onChange({ ...settings, sendButton: e.target.value })} />
-                </div>
-
-                <div className="mt-4 p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-center gap-2 p-3 bg-white rounded border border-gray-200">
-                        <input
-                            type="text"
-                            placeholder="Type your message"
-                            className="flex-1 text-sm outline-none"
+            <div className='flex gap-4 w-full h-full items-end'>
+                <div className="space-y-4 w-[60%] border-r border-gray-200 pr-4">
+                    <div className="setting-item">
+                        <TextInput
+                            label="Text"
+                            value={settings.text}
+                            onChange={e => onChange({ ...settings, text: e.target.value })}
+                            placeholder={settings.text}
+                            icon={HiOutlineChatBubbleLeft}
                         />
-                        <IoSendOutline className="w-5 h-5 text-blue-600" />
+                        <ColorPicker label="Text Color" value={settings.textColor} onChange={e => onChange({ ...settings, textColor: e.target.value })} />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <ColorPicker label="Background" value={settings.background} onChange={e => onChange({ ...settings, background: e.target.value })} />
+                        <ColorPicker label="Border" value={settings.border} onChange={e => onChange({ ...settings, border: e.target.value })} />
+                        <ColorPicker label="Send Button" value={settings.sendButton} onChange={e => onChange({ ...settings, sendButton: e.target.value })} />
+                    </div>
+                </div>
+                <div className='sticky bottom-0 p-4 bg-white w-[50%]'>
+                    <div className='flex items-center gap-2'>
+                        <input
+                            type='text'
+                            placeholder={settings.text}
+                            className={`flex-1 p-2 border border-[${settings.border}] rounded-lg focus:outline-none focus:border-blue-500 text-[${settings.textColor}] bg-[${settings.background}]`}
+                        />
+                        <button
+                            className={`p-2 text-white bg-[${settings.sendButton}] rounded-lg hover:bg-[${settings.sendButton}]`}
+                        >
+                            <IoPaperPlaneOutline className='text-lg' />
+                        </button>
                     </div>
                 </div>
             </div>
@@ -248,7 +236,7 @@ const RemoveChatNodeBranding = () => {
                 <div className="p-4 bg-gray-50 rounded-lg">
                     <div className="flex items-center justify-between p-3 bg-white rounded border border-gray-200">
                         <div className="flex items-center gap-2">
-                            <img src="chatnode-logo.png" alt="ChatNode Logo" className="w-6 h-6" />
+                            <img src="/logo.png" alt="ChatNode Logo" className="w-6 h-6" />
                             <span className="text-sm text-gray-600">Powered by ChatNode</span>
                         </div>
                     </div>
@@ -262,9 +250,75 @@ const RemoveChatNodeBranding = () => {
     );
 };
 
-const CustomIcons = () => {
+const CustomIcons = ({ settings, onChange }) => {
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [uploading, setUploading] = useState(false);
+    const [showPreview, setShowPreview] = useState(false);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const { botId } = useParams()
+
+    const handleFileSelect = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            // Create preview URL
+            const url = URL.createObjectURL(file);
+            setPreviewUrl(url);
+            setShowPreview(true);
+        }
+    };
+
+    const handleUpload = async () => {
+        try {
+            setUploading(true);
+            const formData = new FormData();
+            formData.append('image', selectedFile);
+
+            const response = await axios.post(`${API_BASE_URL}/api/upload-image?botId=${botId}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            if (response.data.success) {
+                toast.success('Image uploaded successfully!');
+                setShowPreview(false);
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+            toast.error('Failed to upload image. Please try again.');
+        } finally {
+            setUploading(false);
+            setSelectedFile(null);
+            setPreviewUrl(null);
+            setShowPreview(false);
+        }
+    };
+
+    const handleCancel = () => {
+        setShowPreview(false);
+        setSelectedFile(null);
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            setPreviewUrl(null);
+        }
+    };
+
+    // Cleanup preview URL when component unmounts
+    useEffect(() => {
+        return () => {
+            if (previewUrl) {
+                URL.revokeObjectURL(previewUrl);
+            }
+        };
+    }, [previewUrl]);
+
     return (
         <SettingSection title="Custom Icons" icon={IoImageOutline}>
+            <div className="flex items-center justify-between">
+                <h4 className="text-sm font-medium text-gray-700">Enable</h4>
+                <Toggle checked={settings.enabled} onChange={e => onChange({ ...settings, enabled: e.target.checked })} />
+            </div>
             <div className="space-y-4">
                 <p className="text-sm text-gray-600">
                     Select your own hi-res images for the popup button on your website and the avatar of your bot.
@@ -273,10 +327,10 @@ const CustomIcons = () => {
                 <div className="p-4 bg-gray-50 rounded-lg">
                     <div className="flex flex-col gap-4">
                         <div className="flex items-start gap-3 max-w-md">
-                            <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
-                                <img src="bot-avatar.png" alt="Bot Avatar" className="w-8 h-8 rounded-full" />
+                            <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                                <img src={`${API_BASE_URL}/api/image/${botId}`} alt="Bot Avatar" className="w-8 h-8 rounded-full" />
                             </div>
-                            <div className="flex-1 bg-white p-3 rounded-lg shadow-sm">
+                            <div className={`flex-1 bg-white p-3 rounded-lg shadow-sm`}>
                                 <p className="text-sm">What is your mission?</p>
                             </div>
                         </div>
@@ -289,10 +343,56 @@ const CustomIcons = () => {
                     </div>
                 </div>
 
-                <Button variant="upgrade" icon={IoImageOutline}>
-                    Upgrade
-                </Button>
+                <div className="relative">
+                    <input
+                        type="file"
+                        id="image-upload"
+                        accept="image/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                    />
+                    <Button
+                        variant="primary"
+                        icon={IoImageOutline}
+                        onClick={() => document.getElementById('image-upload').click()}
+                        disabled={uploading}
+                    >
+                        {uploading ? 'Uploading...' : 'Select Image'}
+                    </Button>
+                </div>
             </div>
+
+            {/* Image Preview Modal */}
+            {showPreview && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-lg w-full mx-4">
+                        <h3 className="text-lg font-semibold mb-4">Preview Image</h3>
+                        <div className="mb-4">
+                            <img
+                                src={previewUrl}
+                                alt="Preview"
+                                className="w-full h-64 object-contain rounded-lg border border-gray-200"
+                            />
+                        </div>
+                        <div className="flex justify-end gap-2">
+                            <Button
+                                variant="secondary"
+                                onClick={handleCancel}
+                                disabled={uploading}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="primary"
+                                onClick={handleUpload}
+                                disabled={uploading}
+                            >
+                                {uploading ? 'Uploading...' : 'Confirm Upload'}
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </SettingSection>
     );
 };
@@ -305,49 +405,55 @@ const PopupMessage = ({ settings, onChange }) => {
                     <h4 className="text-sm font-medium text-gray-700">Enable</h4>
                     <Toggle checked={settings.enabled} onChange={e => onChange({ ...settings, enabled: e.target.checked })} />
                 </div>
+                {settings.enabled && (
+                    <div className='flex gap-4 w-full h-full'>
+                        <div className='w-[50%]'>
+                            <div className="space-y-3">
+                                <TextInput
+                                    label="Message 1"
+                                    value={settings.message1}
+                                    onChange={e => onChange({ ...settings, message1: e.target.value })}
+                                    placeholder="Need help?"
+                                    icon={HiOutlineChatBubbleLeft}
+                                />
+                                <TextInput
+                                    label="Message 2"
+                                    value={settings.message2}
+                                    onChange={e => onChange({ ...settings, message2: e.target.value })}
+                                    placeholder="Type your message"
+                                    icon={HiOutlineChatBubbleLeft}
+                                />
+                            </div>
 
-                <div className="space-y-3">
-                    <TextInput
-                        label="Message 1"
-                        value={settings.message1}
-                        onChange={e => onChange({ ...settings, message1: e.target.value })}
-                        placeholder="Need help?"
-                        icon={HiOutlineChatBubbleLeft}
-                    />
-                    <TextInput
-                        label="Message 2"
-                        value={settings.message2}
-                        onChange={e => onChange({ ...settings, message2: e.target.value })}
-                        placeholder="Type your message"
-                        icon={HiOutlineChatBubbleLeft}
-                    />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <ColorPicker label="Text" value={settings.text} onChange={e => onChange({ ...settings, text: e.target.value })} />
-                    <ColorPicker label="Background" value={settings.background} onChange={e => onChange({ ...settings, background: e.target.value })} />
-                    <ColorPicker label="Border" value={settings.border} onChange={e => onChange({ ...settings, border: e.target.value })} />
-                </div>
-
-                <div className="p-4 bg-gray-50 rounded-lg">
-                    <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                        <div className="flex items-center justify-between p-2 border-b">
-                            <div className="flex gap-1">
-                                <span className="w-2 h-2 rounded-full bg-gray-300"></span>
-                                <span className="w-2 h-2 rounded-full bg-gray-300"></span>
-                                <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <ColorPicker label="Text" value={settings.text} onChange={e => onChange({ ...settings, text: e.target.value })} />
+                                <ColorPicker label="Background" value={settings.background} onChange={e => onChange({ ...settings, background: e.target.value })} />
+                                <ColorPicker label="Border" value={settings.border} onChange={e => onChange({ ...settings, border: e.target.value })} />
                             </div>
                         </div>
-                        <div className="p-4">
-                            <p className="text-sm">Need help?</p>
-                        </div>
-                        <div className="flex justify-end p-2">
-                            <div className="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center">
-                                <IoSendOutline className="w-4 h-4 text-white" />
+
+                        <div className="p-4 bg-gray-50 rounded-lg w-[50%]">
+                            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                                <div className="flex items-center justify-between p-2 border-b">
+                                    <div className="flex gap-1">
+                                        <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                                        <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                                        <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                                    </div>
+                                </div>
+                                <div className="flex justify-end p-2 flex-col items-end">
+                                    <div className={`p-4 bg-[${settings.background}] rounded-lg m-1 border border-[${settings.border}]`}>
+                                        <p className={`text-sm text-[${settings.text}]`}>{settings.message1}</p>
+                                        <p className={`text-sm text-[${settings.text}]`}>{settings.message2}</p>
+                                    </div>
+                                    <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center">
+                                        <IoChatboxEllipsesOutline className="w-6 h-6 text-white" />
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                )}
             </div>
         </SettingSection>
     );
@@ -447,18 +553,26 @@ const Header = ({ settings, onChange }) => {
                                         ></span>
                                         <span
                                             className="text-sm"
-                                            style={{ color: settings.titleColor }}
+                                            style={{ color: settings.statusColor }}
                                         >
                                             {settings.statusText}
                                         </span>
                                     </div>
                                 )}
+                                <div className="flex items-center gap-1">
+                                    <span
+                                        className="text-sm"
+                                        style={{ color: settings.statusColor }}
+                                    >
+                                        Messages 0/20
+                                    </span>
+                                </div>
                             </div>
                             <button
                                 className="p-1.5 rounded-full transition-colors"
                                 style={{ background: settings.resetButton }}
                             >
-                                <IoRefreshOutline className="w-5 h-5" style={{ color: settings.titleColor }} />
+                                <IoRefreshOutline className="w-5 h-5 text-white" />
                             </button>
                         </div>
                     </div>
@@ -537,9 +651,9 @@ const PopupButton = ({ settings, onChange }) => {
                     <ColorPicker label="Icon" value={settings.icon} onChange={e => onChange({ ...settings, icon: e.target.value })} />
                 </div>
 
-                <div className="flex justify-end">
-                    <div className="w-12 h-12 rounded-full bg-blue-600 flex items-center justify-center shadow-lg">
-                        <IoSendOutline className="w-6 h-6 text-white" />
+                <div className={`flex ${settings.buttonOnRight ? 'justify-end' : 'justify-start'}`}>
+                    <div className={`w-12 h-12 rounded-full bg-[${settings.background}] flex items-center justify-center shadow-lg`}>
+                        <IoChatboxEllipsesOutline className={`w-6 h-6 text-[${settings.icon}]`} />
                     </div>
                 </div>
             </div>
@@ -548,8 +662,10 @@ const PopupButton = ({ settings, onChange }) => {
 };
 
 const Customize = () => {
+    const { defaultSettings } = useSelector(state => state.layout);
     const [settings, setSettings] = useState(defaultSettings);
     const [savedSettings, setSavedSettings] = useState(defaultSettings);
+    const dispatch = useDispatch();
 
     useEffect(() => {
         getSettings()
@@ -561,10 +677,12 @@ const Customize = () => {
     }, []);
 
     const handleSave = (newSettings) => {
+        console.log(newSettings, "newSettings")
         const apiCall = savedSettings ? updateSettings : saveSettings;
         apiCall(newSettings)
             .then(data => {
                 setSettings(data);
+                dispatch(setDefaultSettings(data));
                 setSavedSettings(data);
             });
     };
@@ -583,7 +701,7 @@ const Customize = () => {
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                     <ColorPicker
-                        label="Primary Color"
+                        label="Text Color"
                         value={settings.theme.primaryColor}
                         onChange={e => {
                             const newSettings = { ...settings, theme: { ...settings.theme, primaryColor: e.target.value } };
@@ -622,15 +740,18 @@ const Customize = () => {
                     setSettings(newSettings);
                 }}
             />
-            <SuggestedQuestions
+            {/* <SuggestedQuestions
                 settings={settings.suggestedQuestions}
                 onChange={suggestedQuestionsSettings => {
                     const newSettings = { ...settings, suggestedQuestions: suggestedQuestionsSettings };
                     setSettings(newSettings);
                 }}
-            />
-            <RemoveChatNodeBranding />
-            <CustomIcons />
+            /> */}
+            {/* <RemoveChatNodeBranding /> */}
+            <CustomIcons settings={settings.customIcons} onChange={customIconsSettings => {
+                const newSettings = { ...settings, customIcons: customIconsSettings };
+                setSettings(newSettings);
+            }} />
             <PopupMessage
                 settings={settings.popupMessage}
                 onChange={popupMessageSettings => {
@@ -645,17 +766,20 @@ const Customize = () => {
                     setSettings(newSettings);
                 }}
             />
-            <UserInfo
+            {/* <UserInfo
                 settings={settings.userInfo}
                 onChange={userInfoSettings => {
                     const newSettings = { ...settings, userInfo: userInfoSettings };
                     setSettings(newSettings);
                 }}
-            />
+            /> */}
             {hasUnsavedChanges && (
                 <div className="fixed bottom-0 left-0 w-full bg-white border-t p-4 flex justify-end gap-2 z-50">
                     <Button variant="secondary" onClick={() => setSettings(savedSettings)}>Discard</Button>
-                    <Button variant="primary" onClick={() => handleSave(settings)}>Save</Button>
+                    <Button variant="primary" onClick={() => {
+                        console.log(settings, "settings")
+                        handleSave(settings)
+                    }}>Save</Button>
                 </div>
             )}
         </div>

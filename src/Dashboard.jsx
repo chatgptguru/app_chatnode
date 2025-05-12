@@ -6,16 +6,20 @@ import { toast } from 'react-toastify';
 import { HiOutlineSelector } from "react-icons/hi";
 import { LuSettings } from "react-icons/lu";
 import { FaRegUserCircle } from "react-icons/fa";
+import { IoChatboxEllipsesOutline } from "react-icons/io5";
 import { FaAngleDown } from "react-icons/fa";
 import { useNavigate, Outlet } from 'react-router-dom';
 import Bot from './bot/Index';
 import Team from './team/Index';
 import { useDispatch, useSelector } from 'react-redux';
-import { setIsSideBarOpen, setIsTeamBarOpen, setIsBotBarOpen } from './store/reducers/layoutReducer';
+import { setIsSideBarOpen, setIsTeamBarOpen, setIsBotBarOpen, setDefaultSettings, setIsChatbotBarOpen } from './store/reducers/layoutReducer';
+import Chatbot from './chats/Chatbot';
 
 const Dashboard = () => {
     const navigate = useNavigate();
     const isTeamBarOpen = useSelector((state) => state.layout.isTeamBarOpen);
+    const isChatbotBarOpen = useSelector((state) => state.layout.isChatbotBarOpen);
+    const defaultSettings = useSelector((state) => state.layout.defaultSettings);
     const dispatch = useDispatch();
     const signOut = async () => {
         await localStorage.removeItem('token');
@@ -45,7 +49,18 @@ const Dashboard = () => {
         if (isShowTeamDrowDown)
             setIsShowTeamDrowDown(false)
     }
-
+    const getSettings = async () => {
+        const user_id = await localStorage.getItem('user_id');
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/settings?user_id=${user_id}`);
+        return res.data;
+    };
+    useEffect(() => {
+        getSettings()
+            .then(data => {
+                const merged = { ...defaultSettings, ...data };
+                dispatch(setDefaultSettings(merged));
+            });
+    }, []);
     // Fetch teams on component mount
     useEffect(() => {
         getCurrentPlan();
@@ -112,7 +127,7 @@ const Dashboard = () => {
 
     return (
         <div style={{ width: '100vw', height: '100vh' }} onClick={allHideDropDown}>
-            <div className='flex items-center justify-between p-5 text-white bg-blue-500'>
+            <div className={`flex items-center justify-between p-5 text-[${defaultSettings.theme.primaryColor}] bg-[${defaultSettings.theme.backgroundColor}]`}>
                 <div className='text-[20px]'>RAG System</div>
                 <div className='relative'>
                     <div className='flex items-center px-3 py-2 rounded-lg cursor-pointer hover:bg-gray-300' onClick={() => {
@@ -225,6 +240,24 @@ const Dashboard = () => {
                     </div>
                 </div>
             )}
+            {isChatbotBarOpen && location.pathname.indexOf('/bot/') == -1 && (
+                <div className='w-[460px] h-[800px] absolute bottom-20 right-2'>
+                    <Chatbot enable={true}></Chatbot>
+                </div>
+            )}
+            {defaultSettings.popupMessage.enabled && location.pathname.indexOf('/bot/') == -1 && <div className='fixed bottom-0 right-0 m-5 cursor-pointer' onClick={() => {
+                dispatch(setIsChatbotBarOpen(!isChatbotBarOpen))
+            }}>
+                <div className={`flex flex-col ${defaultSettings.popupMessage.buttonOnRight ? 'justify-end items-end' : 'justify-start items-start'}`}>
+                    <div className={`p-4 bg-[${defaultSettings.popupMessage.background}] rounded-lg m-1 border border-[${defaultSettings.popupMessage.border}]`}>
+                        <p className={`text-sm text-[${defaultSettings.popupMessage.text}]`}>{defaultSettings.popupMessage.message1}</p>
+                        <p className={`text-sm text-[${defaultSettings.popupMessage.text}]`}>{defaultSettings.popupMessage.message2}</p>
+                    </div>
+                    <div className={`w-12 h-12 rounded-full bg-[${defaultSettings.popupButton.background}] flex items-center justify-center shadow-lg`}>
+                        <IoChatboxEllipsesOutline className={`w-6 h-6 text-[${defaultSettings.popupButton.icon}]`} />
+                    </div>
+                </div>
+            </div>}
         </div>
     );
 };

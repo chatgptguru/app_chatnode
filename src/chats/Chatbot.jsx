@@ -19,6 +19,79 @@ const Chatbot = ({ enable }) => {
     const [messageLimit, setMessageLimit] = useState(0);
     const { botId } = useParams();
     const [bot, setBot] = useState()
+    const defaultSettings = {
+        theme: {
+            primaryColor: "#4169E1",
+            backgroundColor: "#FFFFFF"
+        },
+        customIcons: {
+            enabled: false,
+        },
+        header: {
+            enabled: true,
+            title: "AI Chatbot",
+            titleColor: "#FFFFFF",
+            statusEnabled: true,
+            statusText: "Online",
+            statusColor: "#4CAF50",
+            shadow: "#E5E5E5",
+            resetButton: "#FFFFFF",
+            background: "#4169E1"
+        },
+        chatBubbles: {
+            greeting: "What can I help you with?",
+            botBubbleBg: "#000000",
+            botBubbleText: "#FFFFFF",
+            userBubbleBg: "#4169E1",
+            userBubbleText: "#FFFFFF",
+            feedback: true,
+            soundEffect: false
+        },
+        chatInput: {
+            text: "",
+            textColor: "#000000",
+            background: "#FFFFFF",
+            border: "#E5E5E5",
+            sendButton: "#000000"
+        },
+        suggestedQuestions: {
+            questions: ["Who Are You?", "What is your purpose?"]
+        },
+        popupMessage: {
+            enabled: true,
+            message1: "Need help?",
+            message2: "Type your message",
+            text: "#000000",
+            background: "#FFFFFF",
+            border: "#E5E5E5"
+        },
+        popupButton: {
+            openByDefault: true,
+            buttonOnRight: true,
+            background: "#4169E1",
+            icon: "#FFFFFF"
+        },
+        userInfo: {
+            collectName: true,
+            collectEmail: true,
+            collectPhone: true,
+            submitButton: "Start Chatting",
+            privacyPolicy: true
+        }
+    };
+    const [settings, setSettings] = useState(defaultSettings);
+    const getSettings = async () => {
+        const user_id = await localStorage.getItem('user_id');
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/settings?user_id=${user_id}`);
+        return res.data;
+    };
+    useEffect(() => {
+        getSettings()
+            .then(data => {
+                const merged = { ...defaultSettings, ...data };
+                setSettings(merged);
+            });
+    }, []);
     useEffect(() => {
         const fetchBot = async () => {
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/bots/${botId}`);
@@ -29,7 +102,6 @@ const Chatbot = ({ enable }) => {
     const getCurrentPlan = async () => {
         try {
             const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/subscriptions/${localStorage.getItem('user_id')}`)
-            console.log(response.data, "response")
             setCurrentPlan(response.data.name);
             setMessageLimit(response.data.message_limit);
             console.log(response.data.message_limit, "message_limit")
@@ -115,14 +187,37 @@ const Chatbot = ({ enable }) => {
     }
     return (
         <>
-            {(bot.public || enable) ? (
+            {(bot?.public || enable) ? (
                 <div className='mx-auto bg-gray-50 rounded-lg shadow-lg flex flex-col w-full h-full'>
-                    <div className='p-4 border-b rounded-t-lg bg-blue-600'>
+                    <div
+                        className='p-4 border-b rounded-t-lg'
+                        style={{
+                            background: settings.header.background,
+                            boxShadow: `0 2px 8px 0 ${settings.header.shadow}`
+                        }}
+                    >
                         <div className='flex items-center justify-between'>
                             <div className='flex items-center gap-2'>
-                                <div className='text-lg font-semibold text-white'>AI Chatbot</div>
-                                <div className='w-2 h-2 bg-green-500 rounded-full'></div>
-                                <div className='text-sm text-white'>Online</div>
+                                <div
+                                    className='text-lg font-semibold'
+                                    style={{ color: settings.header.titleColor }}
+                                >
+                                    {settings.header.title}
+                                </div>
+                                {settings.header.statusEnabled && (
+                                    <>
+                                        <div
+                                            className='w-2 h-2 rounded-full'
+                                            style={{ background: settings.header.statusColor }}
+                                        ></div>
+                                        <div
+                                            className='text-sm'
+                                            style={{ color: settings.header.statusColor }}
+                                        >
+                                            {settings.header.statusText}
+                                        </div>
+                                    </>
+                                )}
                             </div>
                             <div className='flex items-center gap-4'>
                                 {messageLimit && (
@@ -130,10 +225,14 @@ const Chatbot = ({ enable }) => {
                                         Messages: {Math.ceil(messages.length / 2)}/{messageLimit}
                                     </div>
                                 )}
-                                <button className='p-2 rounded-full hover:bg-gray-100' onClick={() => {
-                                    setIsNew(true)
-                                    setMessages([])
-                                }}>
+                                <button
+                                    className='p-2 rounded-full hover:bg-gray-100'
+                                    style={{ background: settings.header.resetButton }}
+                                    onClick={() => {
+                                        setIsNew(true)
+                                        setMessages([])
+                                    }}
+                                >
                                     <IoRefreshSharp className='text-white' />
                                 </button>
                             </div>
@@ -143,13 +242,16 @@ const Chatbot = ({ enable }) => {
                     {/* Chat Messages */}
                     <div className='flex-1 p-4 space-y-4 overflow-y-auto'>
                         {messages.map((message, index) => (
-                            <div key={index} className={`flex ${message.type === "user" ? 'justify-end' : 'justify-start'}`}>
+                            <div key={index} className={`flex items-center ${message.type === "user" ? 'justify-end' : 'justify-start'}`}>
+                                {defaultSettings.customIcons.enabled && message.type != "user" && <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center">
+                                    <img src={`${import.meta.env.VITE_API_URL}/api/image/${botId}`} alt="Bot Avatar" className="w-8 h-8 rounded-full" />
+                                </div>}
                                 <div
                                     className={`max-w-[95%] p-4 rounded-lg ${message.type === "user"
-                                        ? 'bg-white text-gray-800 border border-gray-200'
+                                        ? `bg-[${settings.chatBubbles.userBubbleBg}] text-[${settings.chatBubbles.userBubbleText}] border border-[${settings.chatBubbles.userBubbleBorder}]`
                                         : message.isError
                                             ? 'bg-red-500 text-white'
-                                            : 'bg-blue-500 text-white'
+                                            : `bg-[${settings.chatBubbles.botBubbleBg}] text-[${settings.chatBubbles.botBubbleText}] border border-[${settings.chatBubbles.botBubbleBorder}]`
                                         }`}
                                 >
                                     <div className='text-sm whitespace-pre-wrap'>{message.content}</div>
@@ -191,12 +293,12 @@ const Chatbot = ({ enable }) => {
                                 value={inputText}
                                 onChange={(e) => setInputText(e.target.value)}
                                 onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                                placeholder='Type a message...'
-                                className='flex-1 p-2 border border-gray-200 rounded-lg focus:outline-none focus:border-blue-500'
+                                placeholder={settings.chatInput.placeholder}
+                                className={`flex-1 p-2 border rounded-lg focus:outline-none border-[${settings.chatInput.border}] bg-[${settings.chatInput.background}] text-[${settings.chatInput.textColor}]`}
                             />
                             <button
                                 onClick={handleSendMessage}
-                                className='p-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600'
+                                className={`p-2 text-white bg-[${settings.chatInput.sendButton}] rounded-lg hover:bg-blue-600`}
                             >
                                 <IoPaperPlaneOutline className='text-lg' />
                             </button>
