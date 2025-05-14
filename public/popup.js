@@ -24,6 +24,8 @@ class ChatWidget {
     }
 
     async initialize() {
+        const settings = await this.fetchSettings();
+        this.applySettings(settings);
         this.injectStyles();
         this.createWidget();
         await this.loadSocketIO();
@@ -464,7 +466,7 @@ class ChatWidget {
         const messageElement = document.createElement('div');
         messageElement.className = `message ${type.toLowerCase()}`;
         if (isError) messageElement.style.backgroundColor = '#EF4444';
-        
+
         // Parse markdown for AI messages
         if (type.toLowerCase() === 'ai' && window.marked) {
             messageElement.innerHTML = window.marked.parse(content);
@@ -559,6 +561,66 @@ class ChatWidget {
                 resolve();
             }
         });
+    }
+
+    async fetchSettings() {
+        const botId = this.botId;
+        const response = await fetch(`${this.apiUrl}/api/bot/settings?bot_id=${botId}`);
+        const data = await response.json();
+        return data;
+    }
+
+    applySettings(settings) {
+        this.popupMessage = settings.popupMessage;
+        this.popupButton = settings.popupButton;
+        this.header = settings.header;
+        this.chatBubbles = settings.chatBubbles;
+        this.chatInput = settings.chatInput;
+
+        // Update header styles
+        const header = this.container.querySelector('.chat-widget-header');
+        if (header) {
+            header.style.background = this.header.background;
+            header.style.boxShadow = `0 2px 8px 0 ${this.header.shadow}`;
+            const title = header.querySelector('h3');
+            if (title) {
+                title.style.color = this.header.titleColor;
+            }
+        }
+
+        // Update message bubble styles
+        const messagesContainer = this.container.querySelector('.chat-widget-messages');
+        if (messagesContainer) {
+            messagesContainer.style.background = this.chatBubbles.botBubbleBg;
+        }
+
+        // Update chat input styles
+        const inputContainer = this.container.querySelector('.chat-widget-input-container');
+        if (inputContainer) {
+            inputContainer.style.background = this.chatInput.background;
+            const input = inputContainer.querySelector('.chat-widget-input');
+            if (input) {
+                input.style.color = this.chatInput.textColor;
+                input.style.borderColor = this.chatInput.border;
+            }
+            const sendButton = inputContainer.querySelector('.chat-widget-send-button');
+            if (sendButton) {
+                sendButton.style.background = this.chatInput.sendButton;
+            }
+        }
+
+        // Update popup message styles
+        const popup = this.container.querySelector('.chat-widget-popup');
+        if (popup) {
+            popup.style.background = this.popupMessage.background;
+            popup.style.borderColor = this.popupMessage.border;
+        }
+
+        // Update popup button styles
+        const button = this.container.querySelector('.chat-widget-button');
+        if (button) {
+            button.style.background = this.popupButton.background;
+        }
     }
 }
 

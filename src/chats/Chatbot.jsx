@@ -81,8 +81,7 @@ const Chatbot = ({ enable }) => {
     };
     const [settings, setSettings] = useState(defaultSettings);
     const getSettings = async () => {
-        const user_id = await localStorage.getItem('user_id');
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/settings?user_id=${user_id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/bot/settings?bot_id=${botId}`);
         return res.data;
     };
     useEffect(() => {

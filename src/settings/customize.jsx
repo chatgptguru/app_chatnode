@@ -22,22 +22,18 @@ import { setDefaultSettings } from '../store/reducers/layoutReducer';
 import { useParams } from 'react-router-dom';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL;
-
-const getSettings = async () => {
-    const user_id = await localStorage.getItem('user_id');
-    const res = await axios.get(`${API_BASE_URL}/api/settings?user_id=${user_id}`);
+const getSettings = async (botId) => {
+    const res = await axios.get(`${API_BASE_URL}/api/bot/settings?bot_id=${botId}`);
     return res.data;
 };
 
-const saveSettings = async (settings) => {
-    const user_id = await localStorage.getItem('user_id');
-    const res = await axios.post(`${API_BASE_URL}/api/settings?user_id=${user_id}`, settings);
+const saveSettings = async (settings, botId) => {
+    const res = await axios.post(`${API_BASE_URL}/api/bot/settings?bot_id=${botId}`, settings);
     return res.data;
 };
 
-const updateSettings = async (settings) => {
-    const user_id = await localStorage.getItem('user_id');
-    const res = await axios.put(`${API_BASE_URL}/api/settings?user_id=${user_id}`, settings);
+const updateSettings = async (settings, botId) => {
+    const res = await axios.put(`${API_BASE_URL}/api/bot/settings?bot_id=${botId}`, settings);
     return res.data;
 };
 
@@ -662,13 +658,14 @@ const PopupButton = ({ settings, onChange }) => {
 };
 
 const Customize = () => {
+    const { botId } = useParams()
     const { defaultSettings } = useSelector(state => state.layout);
     const [settings, setSettings] = useState(defaultSettings);
     const [savedSettings, setSavedSettings] = useState(defaultSettings);
     const dispatch = useDispatch();
 
     useEffect(() => {
-        getSettings()
+        getSettings(botId)
             .then(data => {
                 const merged = { ...defaultSettings, ...data };
                 setSettings(merged);
@@ -679,7 +676,7 @@ const Customize = () => {
     const handleSave = (newSettings) => {
         console.log(newSettings, "newSettings")
         const apiCall = savedSettings ? updateSettings : saveSettings;
-        apiCall(newSettings)
+        apiCall(newSettings, botId)
             .then(data => {
                 setSettings(data);
                 dispatch(setDefaultSettings(data));
