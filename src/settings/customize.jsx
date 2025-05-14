@@ -534,7 +534,6 @@ const Header = ({ settings, onChange }) => {
                         className="rounded-t-lg shadow-md"
                         style={{
                             background: settings.background,
-                            boxShadow: `0 2px 8px 0 ${settings.shadow}`
                         }}
                     >
                         <div className="p-4 flex items-center justify-between">

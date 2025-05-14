@@ -24,13 +24,13 @@ class ChatWidget {
     }
 
     async initialize() {
-        const settings = await this.fetchSettings();
-        this.applySettings(settings);
         this.injectStyles();
         this.createWidget();
         await this.loadSocketIO();
         this.initializeSocket();
         this.setupEventListeners();
+        const settings = await this.fetchSettings();
+        this.applySettings(settings);
     }
 
     injectStyles() {
@@ -470,10 +470,13 @@ class ChatWidget {
         // Parse markdown for AI messages
         if (type.toLowerCase() === 'ai' && window.marked) {
             messageElement.innerHTML = window.marked.parse(content);
+            messageElement.style.backgroundColor = this.chatBubbles.botBubbleBg;
+            messageElement.style.color = this.chatBubbles.botBubbleText;
         } else {
             messageElement.textContent = content;
+            messageElement.style.backgroundColor = this.chatBubbles.userBubbleBg;
+            messageElement.style.color = this.chatBubbles.userBubbleText;
         }
-
         // Add security measures for links
         if (type.toLowerCase() === 'ai') {
             const links = messageElement.getElementsByTagName('a');
@@ -578,7 +581,7 @@ class ChatWidget {
         this.chatInput = settings.chatInput;
 
         // Update header styles
-        const header = this.container.querySelector('.chat-widget-header');
+        const header = this.container ? this.container.querySelector('.chat-widget-header') : null;
         if (header) {
             header.style.background = this.header.background;
             header.style.boxShadow = `0 2px 8px 0 ${this.header.shadow}`;
@@ -589,13 +592,13 @@ class ChatWidget {
         }
 
         // Update message bubble styles
-        const messagesContainer = this.container.querySelector('.chat-widget-messages');
-        if (messagesContainer) {
-            messagesContainer.style.background = this.chatBubbles.botBubbleBg;
-        }
+        // const messagesContainer = this.container ? this.container.querySelector('.chat-widget-messages') : null;
+        // if (messagesContainer) {
+        //     messagesContainer.style.background = this.chatBubbles.botBubbleBg;
+        // }
 
         // Update chat input styles
-        const inputContainer = this.container.querySelector('.chat-widget-input-container');
+        const inputContainer = this.container ? this.container.querySelector('.chat-widget-input-container') : null;
         if (inputContainer) {
             inputContainer.style.background = this.chatInput.background;
             const input = inputContainer.querySelector('.chat-widget-input');
@@ -610,14 +613,14 @@ class ChatWidget {
         }
 
         // Update popup message styles
-        const popup = this.container.querySelector('.chat-widget-popup');
+        const popup = this.container ? this.container.querySelector('.chat-widget-popup') : null;
         if (popup) {
             popup.style.background = this.popupMessage.background;
             popup.style.borderColor = this.popupMessage.border;
         }
 
         // Update popup button styles
-        const button = this.container.querySelector('.chat-widget-button');
+        const button = this.container ? this.container.querySelector('.chat-widget-button') : null;
         if (button) {
             button.style.background = this.popupButton.background;
         }

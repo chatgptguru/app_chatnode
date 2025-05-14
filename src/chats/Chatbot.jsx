@@ -193,7 +193,6 @@ const Chatbot = ({ enable }) => {
                         className='p-4 border-b rounded-t-lg'
                         style={{
                             background: settings.header.background,
-                            boxShadow: `0 2px 8px 0 ${settings.header.shadow}`
                         }}
                     >
                         <div className='flex items-center justify-between'>
